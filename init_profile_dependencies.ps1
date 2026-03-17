@@ -113,6 +113,7 @@ $wingetTools = @(
     @{ Name = 'zoxide'; Id = 'zoxide.zoxide' },
     @{ Name = 'pstop'; Id = 'pstop.pstop' },
     @{ Name = 'lazygit'; Id = 'lazygit.lazygit' }
+    @{ Name = 'btop4win'; Id = 'aristocratos.btop4win' }
 )
 
 # 检查 winget 是否可用
