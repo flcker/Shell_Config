@@ -16,7 +16,7 @@
 
 ## pwsh 安装、依赖与配置
 
-[./README_pwsh.md]
+[pwsh 使用说明](./README_pwsh.md)
 
 
 ---
@@ -24,4 +24,4 @@
 
 ## zsh 安装、依赖与配置
 
-[./README_zsh.md]
+[zsh 使用说明](./README_zsh.md)
