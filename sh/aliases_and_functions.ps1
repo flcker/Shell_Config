@@ -27,4 +27,4 @@ Set-Alias find Get-ChildItem -Option AllScope
 Set-Alias htop pstop
 Set-Alias zo zoxide
 Set-Alias lg lazygit
-
+Set-Alias btop btop4win
