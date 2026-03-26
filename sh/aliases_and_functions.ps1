@@ -14,14 +14,14 @@ function set_proxy_fun {
     $env:HTTPS_PROXY = "http://127.0.0.1:7890"
     # $env:ALL_PROXY = "socks5://127.0.0.1:7890"
 }
-Set-Alias set_proxy set_proxy_fun
+Set-Alias setproxy set_proxy_fun
 
 function unset_proxy_fun {
     Remove-Item Env:HTTP_PROXY -ErrorAction SilentlyContinue
     Remove-Item Env:HTTPS_PROXY -ErrorAction SilentlyContinue
     Remove-Item Env:ALL_PROXY -ErrorAction SilentlyContinue
 }
-Set-Alias unset_proxy unset_proxy_fun
+Set-Alias unsetproxy unset_proxy_fun
 
 Set-Alias ls ls_fun -Option AllScope
 Set-Alias ll ll_fun -Option AllScope
