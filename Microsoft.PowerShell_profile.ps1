@@ -15,3 +15,9 @@
 
 # aliases_and_functions.ps1 定义了一些常用的别名和函数
 . $PSScriptRoot\sh\aliases_and_functions.ps1
+
+# config.ps1 加载配置
+. $PSScriptRoot\sh\config.ps1
+
+# claude-mem 函数用于调用 bun.exe 来执行 claude-mem 脚本，传递参数给它
+function claude-mem { & "C:\Users\xes\.bun\bin\bun.exe" "C:\Users\xes\.claude\plugins\cache\thedotmack\claude-mem\10.6.0\scripts\worker-service.cjs" $args }
