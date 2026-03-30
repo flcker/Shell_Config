@@ -9,8 +9,6 @@ tinghua_mirror="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles"
 ustc_mirror="https://mirrors.ustc.edu.cn/homebrew-bottles"
 official_mirror="https://homebrew.bintray.com/bottles"
 
-# 默认使用清华大学的镜像源
-export HOMEBREW_BOTTLE_DOMAIN=$tinghua_mirror
 # 切换 Homebrew 镜像源的函数
 function brewswitch() {
   case "$1" in
@@ -23,6 +21,14 @@ function brewswitch() {
     official|o)
       export HOMEBREW_BOTTLE_DOMAIN=$official_mirror
       ;;
+    list)
+      echo "Current Homebrew bottle domain: $HOMEBREW_BOTTLE_DOMAIN"
+      echo "Available options:"
+      echo "  tsinghua (t) - Tsinghua University mirror"
+      echo "  ustc (u) - University of Science and Technology of China mirror"
+      echo "  official (o) - Official Homebrew mirror"
+      return 0
+      ;;
     *)
       echo "Usage: brewswitch <tsinghua|t|ustc|u|official|o>"
       return 1
@@ -30,3 +36,15 @@ function brewswitch() {
   esac
   echo "Switched Homebrew bottle domain to: $HOMEBREW_BOTTLE_DOMAIN"
 }
+
+# main 函数
+function main() {
+  # 默认使用清华大学的镜像源
+  brewswitch tsinghua
+  exit $?
+}
+
+# 入口函数
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main
+fi
