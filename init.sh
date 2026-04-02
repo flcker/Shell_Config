@@ -15,6 +15,7 @@ trap handle_interrupt INT
 # 定义 brew install list
 brew_install_list=(
   "git" # Git 是一个分布式版本控制系统，用于跟踪文件的更改和协作开发
+  "lazygit" # Lazygit 是一个基于终端的 Git 用户界面，提供更直观的 Git 操作体验
   "starship" # 一个跨平台的 shell 提示符，支持多种主题和插件
   "zsh-autosuggestions" # Zsh 自动补全建议插件
   "zsh-syntax-highlighting" # Zsh 语法高亮插件

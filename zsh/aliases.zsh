@@ -49,8 +49,3 @@ fi
 if command -v bat >/dev/null 2>&1; then
     alias cat='bat --paging=never'     # 使用 bat 替代 cat
 fi
-
-# nvim
-if command -v nvim >/dev/null 2>&1; then
-    alias vim='nvim'                   # 使用 nvim 替代 vim
-fi

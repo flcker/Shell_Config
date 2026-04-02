@@ -1,7 +1,7 @@
 ################################################################################
 # starship
 # 随机从submodule/starship/ 目录下的starship配置文件中选取一个，设置为当前的starship配置
-STARSHIP_DIR="$HOME/.config/zsh/submodule/starship"
+STARSHIP_DIR="$ZSH_CONFIG_STARSHIP_DIR"
 
 function __starship_random_config() {
   local files=("$STARSHIP_DIR"/starship*.toml(N-.))
