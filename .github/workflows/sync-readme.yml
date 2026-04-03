@@ -30,7 +30,7 @@ jobs:
       - name: Check if branch-specific README changed
         id: check
         run: |
-          BRANCH="${{ github.inputs.branch || github.ref_name }}"
+          BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           git fetch origin "$BRANCH" --depth=2
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
