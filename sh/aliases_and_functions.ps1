@@ -1,5 +1,9 @@
 ################################################################################
 # functions and aliases
+
+# refresh profile without restart terminal
+function repwsh { . $PROFILE }
+
 function ls_fun { lsd.exe @args }
 function ll_fun { lsd.exe -alF @args }
 function la_fun { lsd.exe -a @args }
@@ -28,7 +32,6 @@ Set-Alias ll ll_fun -Option AllScope
 Set-Alias la la_fun -Option AllScope
 Set-Alias lr lr_fun -Option AllScope
 Set-Alias ~ Set-Location -Option AllScope
-Set-Alias vim nvim -Option AllScope
 Set-Alias cat bat.exe
 Set-Alias clcb clcb_fun -Option AllScope
 Set-Alias grep Select-String -Option AllScope
