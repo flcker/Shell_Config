@@ -63,29 +63,38 @@ function Install-PowerShellModule {
 function Install-ToolWithWinget {
     param(
         [string]$ToolName,
-        [string]$WingetId
+        [string]$WingetId,
+        [string]$CommandName = $ToolName
     )
     $version = ''
-    $cmdObj = Get-Command $ToolName -ErrorAction SilentlyContinue
+    $cmdObj = Get-Command $CommandName -ErrorAction SilentlyContinue
     if (-not $cmdObj) {
         Write-Host "正在安装工具：$ToolName ..." -ForegroundColor Cyan
         $result = & winget install --id $WingetId -e --source winget
-        $cmdObj = Get-Command $ToolName -ErrorAction SilentlyContinue
+        $cmdObj = Get-Command $CommandName -ErrorAction SilentlyContinue
         if ($LASTEXITCODE -eq 0 -and $cmdObj) {
-            try {
-                $version = (& $ToolName --version) -join ''
-            } catch {
-                $version = ''
+            foreach ($argSet in @(@('--version'), @('-v'), @('version'))) {
+                try {
+                    $raw = & $CommandName @argSet 2>$null
+                    if ($LASTEXITCODE -eq 0 -and $raw) {
+                        $version = ($raw | Where-Object { $_ -and $_.Trim() } | Select-Object -First 1).Trim()
+                        if ($version) { break }
+                    }
+                } catch {}
             }
             $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='成功'; Version=$version}
         } else {
             $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='失败'; Version=''}
         }
     } else {
-        try {
-            $version = (& $ToolName --version) -join ''
-        } catch {
-            $version = ''
+        foreach ($argSet in @(@('--version'), @('-v'), @('version'))) {
+            try {
+                $raw = & $CommandName @argSet 2>$null
+                if ($LASTEXITCODE -eq 0 -and $raw) {
+                    $version = ($raw | Where-Object { $_ -and $_.Trim() } | Select-Object -First 1).Trim()
+                    if ($version) { break }
+                }
+            } catch {}
         }
         $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='已安装'; Version=$version}
     }
@@ -112,15 +121,17 @@ $wingetTools = @(
     @{ Name = 'nvim'; Id = 'Neovim.Neovim' },
     @{ Name = 'zoxide'; Id = 'zoxide.zoxide' },
     @{ Name = 'pstop'; Id = 'pstop.pstop' },
-    @{ Name = 'lazygit'; Id = 'lazygit.lazygit' }
-    @{ Name = 'btop4win'; Id = 'aristocratos.btop4win' }
+    @{ Name = 'lazygit'; Id = 'lazygit.lazygit' },
+    @{ Name = 'btop4win'; Id = 'aristocratos.btop4win' },
+    @{ Name = 'tlrc'; Id = 'tldr-pages.tlrc'; Command = 'tldr' }
 )
 
 # 检查 winget 是否可用
 $wingetAvailable = Get-Command winget -ErrorAction SilentlyContinue
 if ($wingetAvailable) {
     foreach ($tool in $wingetTools) {
-        Install-ToolWithWinget -ToolName $tool.Name -WingetId $tool.Id
+        $cmdName = if ($tool.ContainsKey('Command')) { $tool.Command } else { $tool.Name }
+        Install-ToolWithWinget -ToolName $tool.Name -WingetId $tool.Id -CommandName $cmdName
     }
 } else {
     Write-Host "winget 不可用，已跳过所有非 PowerShell 依赖安装。" -ForegroundColor Yellow
