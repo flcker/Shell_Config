@@ -29,6 +29,7 @@ brew_install_list=(
   "htop" # htop 是一个交互式的进程查看器和系统监视器，提供实时的系统资源使用情况
   "glow" # glow 是一个命令行 Markdown 渲染器，可以在终端中美观地显示 Markdown 文件
   "neovim" # Neovim 是一个现代化的文本编辑器，基于 Vim，提供更好的性能和更多的功能
+  "tlrc" # tlrc 是 Official tldr client written in Rust. tldr的rust实现。
 )
 
 # 提示用户选择要安装的工具，显示安装列表

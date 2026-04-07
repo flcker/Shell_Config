@@ -15,11 +15,3 @@ for config_file in "$ZSH_MODULE_DIR"/*.zsh; do
     source "$config_file"
   fi
 done
-
-
-# plugins
-plugins=(
-  git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-)
