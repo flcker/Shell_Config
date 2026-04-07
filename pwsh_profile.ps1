@@ -6,20 +6,23 @@
 # Write-Host "Loading PowerShell profile"
 # Write-Host "Current directory: $PSScriptRoot"
 
-# prompt.ps1 定义了 PowerShell 的提示符样式和窗口标题
-. $PSScriptRoot\sh\prompt.ps1
+# 需要加载的ps list
+$psFiles = @(
+    "prompt",
+    "starship",
+    "modules",
+    "aliases_and_functions",
+    "nvim",
+    "config"
+)
 
-# starship.ps1 配置了 starship 提示符的样式和切换功能
-. $PSScriptRoot\sh\starship.ps1
-
-# modules.ps1 导入了 PSReadLine、posh-git 和 PSFzf 等模块
-. $PSScriptRoot\sh\modules.ps1
-
-# aliases_and_functions.ps1 定义了一些常用的别名和函数
-. $PSScriptRoot\sh\aliases_and_functions.ps1
-
-# nvim.ps1 配置了 nvim 的环境变量和别名
-. $PSScriptRoot\sh\nvim.ps1
-
-# config.ps1 加载配置
-. $PSScriptRoot\sh\config.ps1
+# 循环加载每个 ps 文件
+foreach ($psFile in $psFiles) {
+    $filePath = Join-Path $PSScriptRoot "sh\$psFile.ps1"
+    if (Test-Path $filePath) {
+        . $filePath
+        # Write-Host "Loaded $psFile" -ForegroundColor Green
+    } else {
+        Write-Host "Warning: $psFile not found at $filePath" -ForegroundColor Yellow
+    }
+}
