@@ -4,13 +4,6 @@
 # refresh profile without restart terminal
 function repwsh { . $PROFILE }
 
-function ls_fun { lsd.exe @args }
-function ll_fun { lsd.exe -alF @args }
-function la_fun { lsd.exe -a @args }
-function lr_fun { lsd.exe -R @args }
-
-# clear clipboard
-function clcb_fun { Set-Clipboard "" }
 
 # http proxy
 function set_proxy_fun {
@@ -27,22 +20,94 @@ function unset_proxy_fun {
 }
 Set-Alias unsetproxy unset_proxy_fun
 
-Set-Alias ls ls_fun -Option AllScope
-Set-Alias ll ll_fun -Option AllScope
-Set-Alias la la_fun -Option AllScope
-Set-Alias lr lr_fun -Option AllScope
-Set-Alias ~ Set-Location -Option AllScope
-Set-Alias cat bat.exe
-Set-Alias clcb clcb_fun -Option AllScope
-Set-Alias grep Select-String -Option AllScope
-Set-Alias rm Remove-Item -Option AllScope
-Set-Alias mv Move-Item -Option AllScope
-Set-Alias cp Copy-Item -Option AllScope
-Set-Alias mkdir New-Item -Option AllScope
-Set-Alias rmdir Remove-Item -Option AllScope
-Set-Alias touch New-Item -Option AllScope
-Set-Alias find Get-ChildItem -Option AllScope
-Set-Alias htop pstop
-Set-Alias zo zoxide
-Set-Alias lg lazygit
-Set-Alias btop btop4win
+
+# Batch alias registration helper for direct command names.
+function Set-AliasBatch {
+    param(
+        [Parameter(Mandatory = $true)]
+        [hashtable]$AliasMap,
+        [System.Management.Automation.ScopedItemOptions]$Option = [System.Management.Automation.ScopedItemOptions]::AllScope
+    )
+
+    foreach ($name in $AliasMap.Keys) {
+        $spec = $AliasMap[$name]
+
+        if ($spec -is [string]) {
+            Set-Alias -Name $name -Value $spec -Option $Option -Scope Global -Force
+            continue
+        }
+
+        $items = @($spec)
+        if ($items.Count -lt 1) { continue }
+
+        $commandName = $items[0]
+        [object[]]$fixedArgs = if ($items.Count -gt 1) { @($items[1..($items.Count - 1)]) } else { @() }
+        $proxyFunctionName = "__alias_$name"
+
+        # Copy values per alias so closures do not share loop variables.
+        $cmd = $commandName
+        [object[]]$presetArgs = @($fixedArgs)
+
+        $proxy = {
+            param([Parameter(ValueFromRemainingArguments = $true)]$RemainingArgs)
+            & $cmd @presetArgs @RemainingArgs
+        }.GetNewClosure()
+
+        Set-Item -Path "Function:Global:$proxyFunctionName" -Value $proxy -Force
+        Set-Alias -Name $name -Value $proxyFunctionName -Option $Option -Scope Global -Force
+    }
+}
+
+
+# lsd aliases
+Set-AliasBatch @{
+    ls    = @('lsd.exe')
+    ll    = @('lsd.exe', '-alF')
+    la    = @('lsd.exe', '-a')
+    lr    = @('lsd.exe', '-R')
+}
+
+
+# git aliases
+Set-AliasBatch @{
+    gs   = @('git', 'status')
+    ga   = @('git', 'add')
+    gc   = @('git', 'commit')
+    gca  = @('git', 'commit', '--amend')
+    gp   = @('git', 'push')
+    gl   = @('git', 'log')
+    gco  = @('git', 'checkout')
+    gb   = @('git', 'branch')
+    gd   = @('git', 'diff')
+    gpl  = @('git', 'pull')
+    gcl  = @('git', 'clone')
+    gcm  = @('git', 'commit', '-m')
+    gst  = @('git', 'stash')
+    gsta = @('git', 'stash', 'apply')
+    gsp  = @('git', 'stash', 'pop')
+    gr   = @('git', 'remote')
+    grv  = @('git', 'remote', '-v')
+    gsw  = @('git', 'switch')
+    gsu  = @('git', 'submodule', 'update', '--init', '--recursive')
+    gwt  = @('git', 'worktree')
+}
+
+
+# other aliases
+Set-AliasBatch @{
+    clcb  = @('Set-Clipboard', '')
+    '~'   = 'Set-Location'
+    grep  = 'Select-String'
+    rm    = 'Remove-Item'
+    mv    = 'Move-Item'
+    cp    = 'Copy-Item'
+    mkdir = 'New-Item'
+    rmdir = 'Remove-Item'
+    touch = 'New-Item'
+    find  = 'Get-ChildItem'
+    cat   = 'bat.exe'
+    htop  = 'pstop'
+    zo    = 'zoxide'
+    lg    = 'lazygit'
+    btop  = 'btop4win'
+}
