@@ -23,6 +23,10 @@ if command -v git >/dev/null 2>&1; then
     alias gl="git log --oneline --graph --decorate"  # 美化的 Git 日志显示
 fi
 
+if command -v lazygit >/dev/null 2>&1; then
+    alias lg='lazygit'                 # 使用 lazygit 替代 lg
+fi
+
 # 判断 lsd 是否存在
 if command -v lsd >/dev/null 2>&1; then
     alias ls='lsd --color=auto'         # 使用 lsd 替代 ls
