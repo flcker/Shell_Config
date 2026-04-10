@@ -147,4 +147,59 @@ VSCode 集成终端使用的是同目录下的 `Microsoft.VSCode_profile.ps1`，
 
 ---
 
+## 开发工具安装（devtools_install.ps1）
+
+`devtools_install.ps1` 用于一键安装 Windows 常用开发工具，支持交互式选择或参数指定。
+
+### 直接从 GitHub 下载运行（无需克隆仓库）
+
+以管理员身份打开 PowerShell，执行以下命令：
+
+```powershell
+# 交互式菜单选择安装
+irm https://raw.githubusercontent.com/flcker/Shell_Config/pwsh/devtools_install.ps1 | iex
+```
+
+> `irm` 是 `Invoke-RestMethod` 的别名，`iex` 是 `Invoke-Expression` 的别名。
+
+若需传递参数（`iex` 不支持直接传参），改用临时文件方式：
+
+```powershell
+# 全部安装
+$tmp = New-TemporaryFile | Rename-Item -NewName { $_.Name -replace '\.tmp$', '.ps1' } -PassThru
+irm https://raw.githubusercontent.com/flcker/Shell_Config/pwsh/devtools_install.ps1 | Set-Content $tmp
+pwsh -File $tmp -All
+Remove-Item $tmp
+
+# 指定工具安装
+pwsh -File $tmp -Tools git,vscode,nanazip
+```
+
+### 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| 无参数 | 显示交互式选择菜单（默认勾选常用工具） |
+| `-All` | 安装全部工具 |
+| `-Tools git,vscode,...` | 只安装指定工具（逗号分隔，不区分大小写） |
+| `-Help` 或 `-h` | 打印帮助信息 |
+
+### 可安装工具
+
+| Key | 工具 | 默认选中 |
+|-----|------|----------|
+| `pwsh` | PowerShell 7 | 是 |
+| `git` | Git | 是 |
+| `vscode` | VSCode | 是 |
+| `nanazip` | NanaZip | 是 |
+| `rust` | Rust (rustup) | 是 |
+| `python` | Python 3（自动获取最新版） | 是 |
+| `node` | Node.js LTS | 否 |
+| `go` | Go | 否 |
+| `java` | Java (Temurin 21) | 否 |
+| `cmake` | CMake | 是 |
+| `windbg` | WinDbg | 是 |
+
+---
+
 如有问题或建议，欢迎 issue 或 PR。

@@ -2,7 +2,7 @@
 # 这个文件是 nvim 的配置文件，位于 PowerShell 的 profile 脚本中。它用于设置 nvim 的环境变量、别名和函数等，以便在 PowerShell 中使用 nvim。  
 # 如果安装了neovim 就设置nvim的配置（submodule/nvim）和 别名
 
-function nvim_func {
+function global:nvim_func {
     $profileRoot = Split-Path $PSScriptRoot -Parent
     $configPath = "$profileRoot\submodule\nvim"
     $initLua = Join-Path $configPath "init.lua"
@@ -23,7 +23,7 @@ function nvim_func {
     }
 }
 
-Set-Alias vim nvim_func -Option AllScope
-Set-Alias vi nvim_func -Option AllScope
+Set-Alias -Name vim -Value nvim_func -Option AllScope -Scope Global
+Set-Alias -Name vi -Value nvim_func -Option AllScope -Scope Global
 # 用 function 而非 alias 覆盖 nvim，避免别名指向自身导致死循环；函数内调用 nvim_func，nvim_func 内部使用 nvim.exe 直接调用可执行文件
-function nvim { nvim_func @Args }
+function global:nvim { nvim_func @Args }

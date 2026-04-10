@@ -2,27 +2,27 @@
 # functions and aliases
 
 # refresh profile without restart terminal
-function repwsh { . $PROFILE }
+function global:repwsh { . $PROFILE }
 
 
 # http proxy
-function set_proxy_fun {
+function global:set_proxy_fun {
     $env:HTTP_PROXY = "http://127.0.0.1:7890"
     $env:HTTPS_PROXY = "http://127.0.0.1:7890"
     # $env:ALL_PROXY = "socks5://127.0.0.1:7890"
 }
-Set-Alias setproxy set_proxy_fun
+Set-Alias -Name setproxy -Value set_proxy_fun -Scope Global
 
-function unset_proxy_fun {
+function global:unset_proxy_fun {
     Remove-Item Env:HTTP_PROXY -ErrorAction SilentlyContinue
     Remove-Item Env:HTTPS_PROXY -ErrorAction SilentlyContinue
     Remove-Item Env:ALL_PROXY -ErrorAction SilentlyContinue
 }
-Set-Alias unsetproxy unset_proxy_fun
+Set-Alias -Name unsetproxy -Value unset_proxy_fun -Scope Global
 
 
 # Batch alias registration helper for direct command names.
-function Set-AliasBatch {
+function global:Set-AliasBatch {
     param(
         [Parameter(Mandatory = $true)]
         [hashtable]$AliasMap,
