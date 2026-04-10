@@ -13,10 +13,26 @@ $selectedConfig = Get-Random -InputObject $starshipConfigs
 $env:STARSHIP_CONFIG = $selectedConfig
 Invoke-Expression (&starship init powershell)
 
+function global:Get-CurrentStarshipConfigName {
+    switch ($env:STARSHIP_CONFIG) {
+        "" { return "default" }
+        "$profileRoot\submodule\starship\starship_custom.toml" { return "custom" }
+        "$profileRoot\submodule\starship\starship_powerline.toml" { return "powerline" }
+        "$profileRoot\submodule\starship\starship_plaintextsymbols.toml" { return "plaintextsymbols" }
+        "$profileRoot\submodule\starship\starship_nerdfontsymbols.toml" { return "nerdfontsymbols" }
+        "$profileRoot\submodule\starship\starship_pastelpowerline.toml" { return "pastelpowerline" }
+        default { return [System.IO.Path]::GetFileNameWithoutExtension($env:STARSHIP_CONFIG) }
+    }
+}
+
 # Function to show usage instructions for switching starship configs
 function global:Show-StarshipUsage {
+    $currentConfig = Get-CurrentStarshipConfigName
     Write-Host @"
 Switch-StarshipConfig (alias: ssc)
+Current config:
+    $currentConfig
+
 Usage:
     ssc [-h] [Config]
 
@@ -67,6 +83,6 @@ function global:Switch-StarshipConfig {
     }
     $env:STARSHIP_CONFIG = $configPaths[$Config]
     Invoke-Expression (&starship init powershell)
-    Write-Host "Switched to starship config: $Config" -ForegroundColor Green
+    Write-Host "Switched to starship config: $(Get-CurrentStarshipConfigName)" -ForegroundColor Green
 }
 Set-Alias -Name ssc -Value Switch-StarshipConfig -Scope Global
