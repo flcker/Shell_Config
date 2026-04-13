@@ -70,7 +70,9 @@ function Install-ToolWithWinget {
     $cmdObj = Get-Command $CommandName -ErrorAction SilentlyContinue
     if (-not $cmdObj) {
         Write-Host "正在安装工具：$ToolName ..." -ForegroundColor Cyan
-        $result = & winget install --id $WingetId -e --source winget
+        $result = & winget install --id $WingetId -e --source winget 2>&1
+        # 刷新当前会话 PATH（winget 将新路径写入注册表，不会自动更新当前会话）
+        $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
         $cmdObj = Get-Command $CommandName -ErrorAction SilentlyContinue
         if ($LASTEXITCODE -eq 0 -and $cmdObj) {
             foreach ($argSet in @(@('--version'), @('-v'), @('version'))) {
@@ -83,6 +85,8 @@ function Install-ToolWithWinget {
                 } catch {}
             }
             $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='成功'; Version=$version}
+        } elseif ($result -match '已安装|找不到可用的升级|No applicable update found|已是最新版本|已安装的现有包') {
+            $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='已安装'; Version=$version}
         } else {
             $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='失败'; Version=''}
         }
@@ -117,12 +121,16 @@ foreach ($mod in $psModules) {
 $wingetTools = @(
     @{ Name = 'starship'; Id = 'Starship.Starship' },
     @{ Name = 'bat'; Id = 'Sharkdp.Bat' },
-    @{ Name = 'lsd'; Id = 'Peltoche.lsd' },
+    @{ Name = 'LSDeluxe'; Id = 'lsd-rs.lsd'; Command = 'lsd' },
     @{ Name = 'nvim'; Id = 'Neovim.Neovim' },
-    @{ Name = 'zoxide'; Id = 'zoxide.zoxide' },
-    @{ Name = 'pstop'; Id = 'pstop.pstop' },
-    @{ Name = 'lazygit'; Id = 'lazygit.lazygit' },
+    @{ Name = 'zoxide'; Id = 'ajeetdsouza.zoxide' },
+    @{ Name = 'fzf'; Id = 'junegunn.fzf' },
+    @{ Name = 'pstop'; Id = 'marlocarlo.pstop' },
+    @{ Name = 'glow'; Id = 'charmbracelet.glow' },
+    @{ Name = 'lazygit'; Id = 'JesseDuffield.lazygit' },
     @{ Name = 'btop4win'; Id = 'aristocratos.btop4win' },
+    @{ Name = 'pnpm'; Id = 'pnpm.pnpm' },
+    @{ Name = 'gping'; Id = 'orf.gping' },
     @{ Name = 'tlrc'; Id = 'tldr-pages.tlrc'; Command = 'tldr' }
 )
 
