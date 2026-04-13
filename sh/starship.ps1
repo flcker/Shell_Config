@@ -7,7 +7,8 @@ $starshipConfigs = @(
     "$profileRoot\submodule\starship\starship_powerline.toml",
     "$profileRoot\submodule\starship\starship_plaintextsymbols.toml",
     "$profileRoot\submodule\starship\starship_nerdfontsymbols.toml",
-    "$profileRoot\submodule\starship\starship_pastelpowerline.toml"
+    "$profileRoot\submodule\starship\starship_pastelpowerline.toml",
+    "$profileRoot\submodule\starship\starship_nerdpowerline.toml"
 )
 $selectedConfig = Get-Random -InputObject $starshipConfigs
 $env:STARSHIP_CONFIG = $selectedConfig
@@ -21,6 +22,7 @@ function global:Get-CurrentStarshipConfigName {
         "$profileRoot\submodule\starship\starship_plaintextsymbols.toml" { return "plaintextsymbols" }
         "$profileRoot\submodule\starship\starship_nerdfontsymbols.toml" { return "nerdfontsymbols" }
         "$profileRoot\submodule\starship\starship_pastelpowerline.toml" { return "pastelpowerline" }
+        "$profileRoot\submodule\starship\starship_nerdpowerline.toml" { return "nerdpowerline" }
         default { return [System.IO.Path]::GetFileNameWithoutExtension($env:STARSHIP_CONFIG) }
     }
 }
@@ -45,6 +47,7 @@ Config options:
     plaintextsymbols (pts) - Use starship_plaintextsymbols.toml
     nerdfontsymbols (nfs)  - Use starship_nerdfontsymbols.toml
     pastelpowerline (ppl)  - Use starship_pastelpowerline.toml
+    nerdpowerline (npl)    - Use starship_nerdpowerline.toml
     default (d)            - Use Starship's default config
 
 Example:
@@ -56,7 +59,7 @@ Example:
 
 function global:Switch-StarshipConfig {
     param(
-        [ValidateSet("custom", "powerline", "plaintextsymbols", "nerdfontsymbols", "pastelpowerline", "default", "c", "pl", "pts", "nfs", "ppl", "d")]
+        [ValidateSet("custom", "powerline", "plaintextsymbols", "nerdfontsymbols", "pastelpowerline", "nerdpowerline", "default", "c", "pl", "pts", "nfs", "ppl", "npl", "d")]
         [string]$Config = "default",
         [Alias("h")]
         [switch]$Help
@@ -78,6 +81,8 @@ function global:Switch-StarshipConfig {
         "nfs" = "$profileRoot\submodule\starship\starship_nerdfontsymbols.toml"
         "pastelpowerline" = "$profileRoot\submodule\starship\starship_pastelpowerline.toml"
         "ppl" = "$profileRoot\submodule\starship\starship_pastelpowerline.toml"
+        "nerdpowerline" = "$profileRoot\submodule\starship\starship_nerdpowerline.toml"
+        "npl" = "$profileRoot\submodule\starship\starship_nerdpowerline.toml"
         "default" = ""
         "d" = ""
     }
