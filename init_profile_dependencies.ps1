@@ -120,7 +120,7 @@ foreach ($mod in $psModules) {
 # winget 工具列表
 $wingetTools = @(
     @{ Name = 'starship'; Id = 'Starship.Starship' },
-    @{ Name = 'bat'; Id = 'sharkdp.Bat' },
+    @{ Name = 'bat'; Id = 'sharkdp.bat' },
     @{ Name = 'fd'; Id = 'sharkdp.fd' },
     @{ Name = 'LSDeluxe'; Id = 'lsd-rs.lsd'; Command = 'lsd' },
     @{ Name = 'nvim'; Id = 'Neovim.Neovim' },
