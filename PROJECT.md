@@ -33,6 +33,7 @@ pwsh/
 | 命令 | 说明 |
 |------|------|
 | `repwsh` | 热更新：重新加载 `$PROFILE` |
+| `refreshenv` | 从注册表刷新用户 & 系统环境变量（含 PATH），无需重启会话 |
 | `ssc [-h] [Config]` | 切换 starship 主题（custom/powerline/plaintextsymbols/nerdfontsymbols/pastelpowerline/default，支持缩写） |
 | `setproxy` / `unsetproxy` | 开关 HTTP 代理（127.0.0.1:7890） |
 | `vim` / `vi` / `nvim` | 调用 Neovim，自动加载 submodule/nvim 配置 |
