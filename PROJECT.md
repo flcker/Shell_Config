@@ -1,6 +1,6 @@
 # PowerShell Config
 
-Windows PowerShell 7+ 个人终端配置，模块化管理，通过 git submodule 维护第三方配置。
+Windows PowerShell 7+ 个人终端配置，模块化管理，通过 git submodule 维护跨平台工具配置（统一存放于 [ShellCfgSubmodule](https://github.com/flcker/ShellCfgSubmodule)，各工具对应独立分支）。
 
 ## 结构
 
@@ -17,8 +17,8 @@ pwsh/
 │   ├── nvim.ps1                  # Neovim 别名 & submodule 配置加载
 │   └── config.ps1                # zoxide 初始化
 └── submodule/
-    ├── starship/                 # starship 主题 toml（5 套）
-    └── nvim/                     # Neovim 配置（init.lua 优先）
+    ├── starship/                 # starship 主题 toml（5 套）← ShellCfgSubmodule@starship
+    └── nvim/                     # Neovim 配置（init.lua 优先）← ShellCfgSubmodule@nvim
 ```
 
 ## 关键约定
@@ -82,4 +82,16 @@ irm https://raw.githubusercontent.com/flcker/Shell_Config/pwsh/devtools_install.
 
 ```powershell
 git submodule update --init --recursive
+```
+
+更新所有 submodule 到各分支最新：
+
+```powershell
+git submodule update --remote --merge
+```
+
+新增工具配置：在 [ShellCfgSubmodule](https://github.com/flcker/ShellCfgSubmodule) 创建对应分支，再执行：
+
+```powershell
+git submodule add -b <branch> git@github.com:flcker/ShellCfgSubmodule.git submodule/<name>
 ```

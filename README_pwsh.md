@@ -74,12 +74,12 @@
 
 ## Submodule 说明
 
-本仓库通过 git submodule 管理第三方配置，位于 `submodule/` 目录下：
+工具配置统一存放于 [ShellCfgSubmodule](https://github.com/flcker/ShellCfgSubmodule)，各工具对应独立分支，通过 git submodule 引入到 `submodule/` 目录下：
 
-| Submodule | 路径 | 说明 |
-|-----------|------|------|
-| starship | `submodule/starship/` | starship 主题配置文件（toml） |
-| nvim | `submodule/nvim/` | Neovim 配置，包含 init.lua 或 init.vim |
+| Submodule | 路径 | 分支 | 说明 |
+|-----------|------|------|------|
+| starship | `submodule/starship/` | `starship` | starship 主题配置文件（toml） |
+| nvim | `submodule/nvim/` | `nvim` | Neovim 配置，包含 init.lua 或 init.vim |
 
 **初始化 submodule（首次克隆后执行）：**
 
@@ -87,10 +87,19 @@
 git submodule update --init --recursive
 ```
 
-**更新所有 submodule：**
+**更新所有 submodule 到各分支最新：**
 
 ```bash
 git submodule update --remote --merge
+```
+
+**新增工具配置：**
+
+1. 在 ShellCfgSubmodule 创建对应分支（建议使用 `--orphan` 保持历史独立）
+2. 在本仓库执行：
+
+```bash
+git submodule add -b <branch> git@github.com:flcker/ShellCfgSubmodule.git submodule/<name>
 ```
 
 ---
