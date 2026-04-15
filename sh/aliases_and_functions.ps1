@@ -6,7 +6,7 @@ function global:repwsh { . $PROFILE }
 
 
 # refresh user & system PATH (and all env vars) from registry without restarting session
-function global:Refresh-Env {
+function global:Update-Env {
     $machinePath = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
     $userPath    = [System.Environment]::GetEnvironmentVariable('Path', 'User')
     $env:Path    = ($machinePath, $userPath | Where-Object { $_ }) -join ';'
@@ -19,8 +19,9 @@ function global:Refresh-Env {
 
     Write-Host "Environment refreshed." -ForegroundColor Green
 }
-Set-Alias -Name refreshenv -Value Refresh-Env -Scope Global
-Set-Alias -Name reenv -Value Refresh-Env -Scope Global
+Set-Alias -Name updateenv -Value Update-Env -Scope Global
+Set-Alias -Name upenv -Value Update-Env -Scope Global
+Set-Alias -Name reenv -Value Update-Env -Scope Global
 
 
 # http proxy
