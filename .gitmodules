@@ -1,6 +1,12 @@
-[submodule "submodule/starship"]
-	path = submodule/starship
-	url = git@github.com:flcker/starship_config.git
 [submodule "submodule/nvim"]
 	path = submodule/nvim
-	url = git@github.com:flcker/nvim.git
+	url = git@github.com:flcker/ShellCfgSubmodule.git
+	branch = nvim
+	shallow = true
+	update = rebase
+[submodule "submodule/starship"]
+	path = submodule/starship
+	url = git@github.com:flcker/ShellCfgSubmodule.git
+	branch = starship
+	shallow = true
+	update = rebase
