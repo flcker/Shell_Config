@@ -127,6 +127,7 @@ $wingetTools = @(
     @{ Name = 'zoxide'; Id = 'ajeetdsouza.zoxide' },
     @{ Name = 'fzf'; Id = 'junegunn.fzf' },
     @{ Name = 'pstop'; Id = 'marlocarlo.pstop' },
+    @{ Name = 'RipGrep MSVC'; Id = 'BurntSushi.ripgrep.MSVC'; Command = 'rg' },
     @{ Name = 'glow'; Id = 'charmbracelet.glow' },
     @{ Name = 'lazygit'; Id = 'JesseDuffield.lazygit' },
     @{ Name = 'btop4win'; Id = 'aristocratos.btop4win' },

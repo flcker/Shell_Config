@@ -77,15 +77,6 @@ function global:Set-AliasBatch {
 }
 
 
-# lsd aliases
-Set-AliasBatch @{
-    ls    = @('lsd.exe')
-    ll    = @('lsd.exe', '-alF')
-    la    = @('lsd.exe', '-a')
-    lr    = @('lsd.exe', '-R')
-}
-
-
 # git aliases
 Set-AliasBatch @{
     gs   = @('git', 'status')
@@ -110,12 +101,36 @@ Set-AliasBatch @{
     gwt  = @('git', 'worktree')
 }
 
+# extension tools aliases
+# 同样先检查相关工具是否存在，避免设置无效别名。
+$toolAliasMap = @(
+    @{ Command = 'lsd.exe'   ;  Aliases = @{ ls = @('lsd.exe'); ll = @('lsd.exe', '-alF'); la = @('lsd.exe', '-a'); lr = @('lsd.exe', '-R') } },
+    @{ Command = 'bat.exe'   ;  Aliases = @{ cat  = 'bat.exe'   } },
+    @{ Command = 'pstop'     ;  Aliases = @{ htop = 'pstop'     } },
+    @{ Command = 'zoxide'    ;  Aliases = @{ zo   = 'zoxide'    } },
+    @{ Command = 'lazygit'   ;  Aliases = @{ lg   = 'lazygit'   } },
+    @{ Command = 'btop4win'  ;  Aliases = @{ btop = 'btop4win'  } },
+    @{ Command = 'rg.exe'    ;  Aliases = @{ rg   = @('rg.exe', '--color=auto') } }
+)
+
+foreach ($item in $toolAliasMap)
+{
+    if (Get-Command $item.Command -ErrorAction SilentlyContinue)
+    {
+        foreach ($aliasName in $item.Aliases.Keys) {
+            if (Get-Alias $aliasName -ErrorAction SilentlyContinue) {
+                Remove-Item "Alias:$aliasName" -ErrorAction SilentlyContinue
+            }
+        }
+        Set-AliasBatch $item.Aliases
+    }
+}
+
 
 # other aliases
 Set-AliasBatch @{
     clcb  = @('Set-Clipboard', '')
     '~'   = 'Set-Location'
-    grep  = 'Select-String'
     rm    = 'Remove-Item'
     mv    = 'Move-Item'
     cp    = 'Copy-Item'
@@ -123,9 +138,4 @@ Set-AliasBatch @{
     rmdir = 'Remove-Item'
     touch = 'New-Item'
     find  = 'Get-ChildItem'
-    cat   = 'bat.exe'
-    htop  = 'pstop'
-    zo    = 'zoxide'
-    lg    = 'lazygit'
-    btop  = 'btop4win'
 }
