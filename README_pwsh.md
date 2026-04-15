@@ -80,6 +80,7 @@
 |-----------|------|------|------|
 | starship | `submodule/starship/` | `starship` | starship 主题配置文件（toml） |
 | nvim | `submodule/nvim/` | `nvim` | Neovim 配置，包含 init.lua 或 init.vim |
+| git | `submodule/git/` | `git` | git alias & color 配置，通过 `[include]` 加载到 `~/.gitconfig` |
 
 **初始化 submodule（首次克隆后执行）：**
 
@@ -122,8 +123,10 @@ pwsh/
     │   ├── starship_custom.toml
     │   ├── starship_powerline.toml
     │   └── starship_plaintextsymbols.toml
-    └── nvim/
-        └── init.lua                  # Neovim 配置入口（优先加载，也支持 init.vim）
+    ├── nvim/
+    │   └── init.lua                  # Neovim 配置入口（优先加载，也支持 init.vim）
+    └── git/
+        └── config                    # git alias & color，~/.gitconfig 通过 [include] 加载
 ```
 
 ---
