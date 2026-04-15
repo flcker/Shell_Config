@@ -10,3 +10,9 @@
 	branch = starship
 	shallow = true
 	update = rebase
+[submodule "submodule/git"]
+	path = submodule/git
+	url = git@github.com:flcker/ShellCfgSubmodule.git
+	branch = git
+	shallow = true
+	update = rebase
