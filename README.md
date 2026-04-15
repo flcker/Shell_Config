@@ -38,5 +38,6 @@
 | :---: | :--- |
 | starship | starship 主题配置 |
 | nvim | Neovim 配置 |
+| git | git alias & color 配置，通过 `[include]` 加载到 `~/.gitconfig` |
 
 新增工具：在 ShellCfgSubmodule 创建对应分支，在本仓库执行 `git submodule add -b <branch>`。

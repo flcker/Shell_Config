@@ -18,7 +18,8 @@ pwsh/
 │   └── config.ps1                # zoxide 初始化
 └── submodule/
     ├── starship/                 # starship 主题 toml（5 套）← ShellCfgSubmodule@starship
-    └── nvim/                     # Neovim 配置（init.lua 优先）← ShellCfgSubmodule@nvim
+    ├── nvim/                     # Neovim 配置（init.lua 优先）← ShellCfgSubmodule@nvim
+    └── git/                      # git alias & color 配置（config）← ShellCfgSubmodule@git
 ```
 
 ## 关键约定
