@@ -60,6 +60,32 @@ function Install-PowerShellModule {
     }
 }
 
+function Test-WingetPackageInstalled {
+    param([string]$WingetId)
+
+    if (-not $WingetId) { return $false }
+    $listed = winget list --id $WingetId --source winget 2>$null | Select-String ([regex]::Escape($WingetId))
+    return $null -ne $listed
+}
+
+function Get-CommandVersion {
+    param([string]$CommandName)
+
+    if (-not $CommandName) { return '' }
+    foreach ($argSet in @(@('--version'), @('-v'), @('version'))) {
+        try {
+            $global:LASTEXITCODE = 0
+            $raw = & $CommandName @argSet 2>$null
+            if ($LASTEXITCODE -eq 0 -and $raw) {
+                $version = ($raw | Where-Object { $_ -and $_.Trim() } | Select-Object -First 1).Trim()
+                if ($version) { return $version }
+            }
+        } catch {}
+    }
+
+    return ''
+}
+
 function Install-ToolWithWinget {
     param(
         [string]$ToolName,
@@ -67,40 +93,34 @@ function Install-ToolWithWinget {
         [string]$CommandName = $ToolName
     )
     $version = ''
-    $cmdObj = Get-Command $CommandName -ErrorAction SilentlyContinue
-    if (-not $cmdObj) {
-        Write-Host "正在安装工具：$ToolName ..." -ForegroundColor Cyan
-        $result = & winget install --id $WingetId -e --source winget 2>&1
-        # 刷新当前会话 PATH（winget 将新路径写入注册表，不会自动更新当前会话）
-        $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
-        $cmdObj = Get-Command $CommandName -ErrorAction SilentlyContinue
-        if ($LASTEXITCODE -eq 0 -and $cmdObj) {
-            foreach ($argSet in @(@('--version'), @('-v'), @('version'))) {
-                try {
-                    $raw = & $CommandName @argSet 2>$null
-                    if ($LASTEXITCODE -eq 0 -and $raw) {
-                        $version = ($raw | Where-Object { $_ -and $_.Trim() } | Select-Object -First 1).Trim()
-                        if ($version) { break }
-                    }
-                } catch {}
-            }
-            $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='成功'; Version=$version}
-        } elseif ($result -match '已安装|找不到可用的升级|No applicable update found|已是最新版本|已安装的现有包') {
-            $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='已安装'; Version=$version}
-        } else {
-            $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='失败'; Version=''}
-        }
-    } else {
-        foreach ($argSet in @(@('--version'), @('-v'), @('version'))) {
-            try {
-                $raw = & $CommandName @argSet 2>$null
-                if ($LASTEXITCODE -eq 0 -and $raw) {
-                    $version = ($raw | Where-Object { $_ -and $_.Trim() } | Select-Object -First 1).Trim()
-                    if ($version) { break }
-                }
-            } catch {}
-        }
+    $cmdObj = if ($CommandName) { Get-Command $CommandName -ErrorAction SilentlyContinue } else { $null }
+    if ($cmdObj) {
+        $version = Get-CommandVersion -CommandName $CommandName
         $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='已安装'; Version=$version}
+        return
+    }
+
+    if (Test-WingetPackageInstalled -WingetId $WingetId) {
+        $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='已安装'; Version=''}
+        return
+    }
+
+    Write-Host "正在安装工具：$ToolName ..." -ForegroundColor Cyan
+    $result = & winget install --id $WingetId -e --source winget 2>&1
+    # 刷新当前会话 PATH（winget 将新路径写入注册表，不会自动更新当前会话）
+    $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+    $cmdObj = if ($CommandName) { Get-Command $CommandName -ErrorAction SilentlyContinue } else { $null }
+    $packageInstalled = Test-WingetPackageInstalled -WingetId $WingetId
+
+    if ($LASTEXITCODE -eq 0 -and ($cmdObj -or $packageInstalled)) {
+        if ($cmdObj) {
+            $version = Get-CommandVersion -CommandName $CommandName
+        }
+        $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='成功'; Version=$version}
+    } elseif ($result -match '已安装|找不到可用的升级|No applicable update found|已是最新版本|已安装的现有包' -or $packageInstalled) {
+        $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='已安装'; Version=''}
+    } else {
+        $script:installResults += [PSCustomObject]@{Name=$ToolName; Result='失败'; Version=''}
     }
 }
 
@@ -133,7 +153,8 @@ $wingetTools = @(
     @{ Name = 'btop4win'; Id = 'aristocratos.btop4win' },
     @{ Name = 'pnpm'; Id = 'pnpm.pnpm' },
     @{ Name = 'gping'; Id = 'orf.gping' },
-    @{ Name = 'tlrc'; Id = 'tldr-pages.tlrc'; Command = 'tldr' }
+    @{ Name = 'tlrc'; Id = 'tldr-pages.tlrc'; Command = 'tldr' },
+    @{ Name = 'coreutils'; Id = 'uutils.coreutils'; Command = '' }
 )
 
 # 检查 winget 是否可用

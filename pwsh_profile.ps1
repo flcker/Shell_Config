@@ -13,6 +13,7 @@ $psFiles = @(
     "modules",
     "aliases_and_functions",
     "nvim",
+    "coreutils",
     "config"
 )
 

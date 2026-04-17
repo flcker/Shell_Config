@@ -9,6 +9,7 @@
    - starship.ps1：starship 主题配置与切换
    - modules.ps1：模块导入与 PSReadLine 设置
    - aliases_and_functions.ps1：常用别名与函数
+   - coreutils.ps1：检测 uutils coreutils 可执行文件，提供命令查询函数，并覆盖冲突的 PowerShell Alias
    - config.ps1：zoxide 等工具初始化配置
    - nvim.ps1：Neovim 别名与配置加载（自动使用 submodule/nvim 下的 init.lua/init.vim）
 
@@ -116,6 +117,7 @@ pwsh/
 │   ├── starship.ps1              # starship 主题配置与切换
 │   ├── modules.ps1               # 模块导入与 PSReadLine 设置
 │   ├── aliases_and_functions.ps1 # 常用别名与函数
+│   ├── coreutils.ps1             # coreutils 存在时覆盖冲突 Alias
 │   ├── config.ps1                # zoxide 等工具初始化
 │   └── nvim.ps1                  # Neovim 别名与配置加载
 └── submodule/
@@ -144,6 +146,32 @@ pwsh -File path\to\init_profile_dependencies.ps1
 ```
 
 安装完成后重启 PowerShell 即可。
+
+### 安装了 coreutils，但 `ls` / `cat` / `cp` 仍然是 PowerShell 命令
+
+**原因**：PowerShell 的同名 Alias 会优先于外部命令。`coreutils.ps1` 会优先检查 `PATH`，找不到时再回退到 winget 的 `uutils.coreutils` 安装目录，然后覆盖这些冲突 Alias。
+
+**当前行为**：当 `uutils.coreutils` 已安装且命令在 `PATH` 中时，`dir`、`cp`、`mv`、`rm`、`mkdir`、`rmdir`、`touch`、`pwd`、`echo` 会优先调用对应的 coreutils 可执行文件；`ls` 由 `lsd` 接管，`cat` 由 `bat` 接管，`ll` / `la` / `lr` 仍然保持为 `lsd`。
+
+可用以下命令查看当前 profile 识别到的 coreutils 命令与 usage：
+
+```powershell
+gcu                    # 按分类查看支持的 coreutils 命令
+gcu -a                 # 只看当前可用命令
+gcu -c text
+gcu -c fs
+gcu cp                 # 查看 cp 的 usage / help
+gcuu cp                # 同上
+```
+
+分类短代码：
+
+- `fs` = 文件与路径
+- `text` = 文本与输出
+- `hash` = 编码与校验
+- `sys` = 系统与环境
+- `exec` = 执行与控制
+- `data` = 数据与计算
 
 ### $PROFILE 路径在哪里？
 

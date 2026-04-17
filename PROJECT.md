@@ -14,6 +14,7 @@ pwsh/
 │   ├── starship.ps1              # starship 主题随机加载 & 切换
 │   ├── modules.ps1               # PSReadLine / posh-git / PSFzf
 │   ├── aliases_and_functions.ps1 # 别名与工具函数
+│   ├── coreutils.ps1             # coreutils 命令查询与冲突 Alias 覆盖
 │   ├── nvim.ps1                  # Neovim 别名 & submodule 配置加载
 │   └── config.ps1                # zoxide 初始化
 └── submodule/
@@ -38,10 +39,11 @@ pwsh/
 | `ssc [-h] [Config]` | 切换 starship 主题（custom/powerline/plaintextsymbols/nerdfontsymbols/pastelpowerline/default，支持缩写） |
 | `setproxy` / `unsetproxy` | 开关 HTTP 代理（127.0.0.1:7890） |
 | `vim` / `vi` / `nvim` | 调用 Neovim，自动加载 submodule/nvim 配置 |
-| `ll` / `la` / `lr` | lsd 替代 ls |
-| `cat` | bat（语法高亮） |
+| `dir` / `cp` / `mv` / `rm` / `mkdir` / `rmdir` / `touch` / `pwd` / `echo` | 检测到对应 coreutils `*.exe` 时，优先绑定（`ls` 由 lsd 接管，`cat` 由 bat 接管） |
+| `Get-CoreutilsCommands` / `gcu` / `gcuu` | `gcu` 按分类查看 coreutils 命令，支持 `-a` / `-c text` 这类短参数，`gcu <命令>` 查看 usage |
+| `ll` / `la` / `lr` | lsd 扩展列表命令 |
 | `lg` | lazygit |
-| `gs/ga/gc/gp/gl/gd/gco/gb…` | git 常用操作缩写 |
+| `git st/co/sw/br/ci/wt/lg…` | git native aliases（见 submodule/git/config） |
 
 ## 依赖
 
@@ -49,7 +51,7 @@ pwsh/
 
 PowerShell 模块：`PSReadLine`、`posh-git`、`PSFzf`
 
-外部工具（winget）：`starship`、`bat`、`lsd`、`nvim`、`zoxide`、`pstop`、`lazygit`、`btop4win`、`tlrc`
+外部工具（winget）：`starship`、`bat`、`lsd`、`nvim`、`zoxide`、`pstop`、`lazygit`、`btop4win`、`tlrc`、`uutils.coreutils`
 
 ```powershell
 pwsh -File .\init_profile_dependencies.ps1        # 当前用户

@@ -41,6 +41,32 @@ Set-Alias -Name unsetproxy -Value unset_proxy_fun -Scope Global
 
 
 # Batch alias registration helper for direct command names.
+function global:Resolve-AliasCommandTarget {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$CommandTarget
+    )
+
+    if ($CommandTarget -is [string] -or $CommandTarget -is [scriptblock]) {
+        return $CommandTarget
+    }
+
+    if ($CommandTarget -is [System.Management.Automation.CommandInfo]) {
+        if ($CommandTarget.Source) { return [string]$CommandTarget.Source }
+        return [string]$CommandTarget.Name
+    }
+
+    if ($CommandTarget.PSObject.Properties.Match('Source').Count -gt 0 -and $CommandTarget.Source) {
+        return [string]$CommandTarget.Source
+    }
+
+    if ($CommandTarget.PSObject.Properties.Match('FullName').Count -gt 0 -and $CommandTarget.FullName) {
+        return [string]$CommandTarget.FullName
+    }
+
+    return [string]$CommandTarget
+}
+
 function global:Set-AliasBatch {
     param(
         [Parameter(Mandatory = $true)]
@@ -50,18 +76,27 @@ function global:Set-AliasBatch {
 
     foreach ($name in $AliasMap.Keys) {
         $spec = $AliasMap[$name]
+        $proxyFunctionName = "__alias_$name"
+
+        if ($null -eq $spec) {
+            continue
+        }
 
         if ($spec -is [string]) {
+            if (Test-Path "Function:Global:$proxyFunctionName") {
+                Remove-Item "Function:Global:$proxyFunctionName" -Force
+            }
             Set-Alias -Name $name -Value $spec -Option $Option -Scope Global -Force
             continue
         }
 
         $items = @($spec)
         if ($items.Count -lt 1) { continue }
+        if ($null -eq $items[0]) { continue }
 
-        $commandName = $items[0]
+        $commandName = Resolve-AliasCommandTarget -CommandTarget $items[0]
+        if ([string]::IsNullOrWhiteSpace([string]$commandName)) { continue }
         [object[]]$fixedArgs = if ($items.Count -gt 1) { @($items[1..($items.Count - 1)]) } else { @() }
-        $proxyFunctionName = "__alias_$name"
 
         # Copy values per alias so closures do not share loop variables.
         $cmd = $commandName
@@ -78,29 +113,7 @@ function global:Set-AliasBatch {
 }
 
 
-# git aliases
-Set-AliasBatch @{
-    gs   = @('git', 'status')
-    ga   = @('git', 'add')
-    gc   = @('git', 'commit')
-    gca  = @('git', 'commit', '--amend')
-    gp   = @('git', 'push')
-    gl   = @('git', 'log')
-    gco  = @('git', 'checkout')
-    gb   = @('git', 'branch')
-    gd   = @('git', 'diff')
-    gpl  = @('git', 'pull')
-    gcl  = @('git', 'clone')
-    gcm  = @('git', 'commit', '-m')
-    gst  = @('git', 'stash')
-    gsta = @('git', 'stash', 'apply')
-    gsp  = @('git', 'stash', 'pop')
-    gr   = @('git', 'remote')
-    grv  = @('git', 'remote', '-v')
-    gsw  = @('git', 'switch')
-    gsu  = @('git', 'submodule', 'update', '--init', '--recursive')
-    gwt  = @('git', 'worktree')
-}
+# git aliases — 已迁移至 submodule/git/config (git native aliases)
 
 # extension tools aliases
 # 同样先检查相关工具是否存在，避免设置无效别名。
@@ -132,11 +145,6 @@ foreach ($item in $toolAliasMap)
 Set-AliasBatch @{
     clcb  = @('Set-Clipboard', '')
     '~'   = 'Set-Location'
-    rm    = 'Remove-Item'
-    mv    = 'Move-Item'
-    cp    = 'Copy-Item'
-    mkdir = 'New-Item'
-    rmdir = 'Remove-Item'
-    touch = 'New-Item'
+    # rm/mv/cp/mkdir/rmdir/touch — 已由 coreutils.ps1 按需覆盖
     find  = 'Get-ChildItem'
 }
