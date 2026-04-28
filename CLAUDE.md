@@ -17,12 +17,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `functions.zsh` — `color_echo`、`setproxy`/`unsetproxy`（代理地址 `127.0.0.1:7890`）、`ghostty_keybinds`
 - `brew.zsh` — `brewswitch` 函数，用于切换 Homebrew 镜像源（清华/USTC/官方）；直接执行时默认使用清华源
 - `nodejs.zsh` — `npmswitch` 函数，用于切换 npm 镜像源（官方/淘宝）；直接执行时默认使用淘宝源
-- `archive.zsh` — 归档两件套（`x`/`a`）：`extract` 解压、`archive` 打包或压缩；格式由输出文件扩展名决定；无参数显示用法
+- `starship.zsh` — 启动时随机选取 `submodule/starship/starship_*.toml` 中的一个主题；`ssc` 命令切换主题，支持短别名（`c`/`pl`/`r` 等），`ssc -h` 列出所有主题和别名
+- `archive.zsh` — 归档两件套（`x`/`a`）：`extract [-o <dir>]` 解压、`archive [-C <dir>]` 打包或压缩；格式由扩展名决定；无参数显示用法
 - `nvim.zsh` — 通过 `-u` 参数让 nvim 加载 `submodule/nvim/init.lua`，并将 `vim`/`vi` 别名指向该包装函数
 
 **子模块**（`submodule/`）：
 - `submodule/sheldon/` — sheldon 插件配置（`plugins.toml`）；`plugins.zsh` 通过 `SHELDON_CONFIG_FILE` 指向此文件。插件本体由 sheldon 在 `~/.local/share/sheldon/` 中管理（不入仓）
-- `submodule/starship/` — starship TOML 配置文件；`ssc` 命令用于切换主题（`custom`、`powerline`、`plaintextsymbols`、`random`）。随机主题使用 zsh 内置随机数，仅从匹配 `starship*.toml` 的文件中选取
+- `submodule/starship/` — starship TOML 配置文件集合（`starship_*.toml`）；由 `starship.zsh` 在启动时随机选取，`ssc` 命令可手动切换
 - `submodule/nvim/` — 独立的 neovim 配置（`init.lua` + `lua/` 目录），通过 `-u` 参数加载，不影响系统 nvim 配置
 
 ## 初始化
@@ -39,7 +40,7 @@ source ~/.config/zsh/zshrc.zsh
 
 | 命令 | 说明 |
 |---|---|
-| `ssc [custom\|powerline\|plaintextsymbols\|random]` | 切换 starship 主题 |
+| `ssc [theme]` | 切换 starship 主题；短别名 `c` `pl` `npl` `ppl` `nfs` `pts` `r`；`ssc -h` 列出全部 |
 | `brewswitch [tsinghua\|ustc\|official\|list]` | 切换 Homebrew 镜像源 |
 | `npmswitch [official\|taobao\|list]` | 切换 npm 镜像源 |
 | `setproxy` / `unsetproxy` | 开启/关闭 HTTP/SOCKS5 代理（`127.0.0.1:7890`） |
