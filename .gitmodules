@@ -16,3 +16,9 @@
 	branch = git
 	shallow = true
 	update = rebase
+[submodule "submodule/sheldon"]
+	path = submodule/sheldon
+	url = git@github.com:flcker/ShellCfgSubmodule.git
+	branch = sheldon
+	shallow = true
+	update = rebase

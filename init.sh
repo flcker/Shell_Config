@@ -17,8 +17,8 @@ brew_install_list=(
   "git" # Git 是一个分布式版本控制系统，用于跟踪文件的更改和协作开发
   "lazygit" # Lazygit 是一个基于终端的 Git 用户界面，提供更直观的 Git 操作体验
   "starship" # 一个跨平台的 shell 提示符，支持多种主题和插件
-  "zsh-autosuggestions" # Zsh 自动补全建议插件
-  "zsh-syntax-highlighting" # Zsh 语法高亮插件
+  "sheldon" # sheldon 是一个快速的 zsh 插件管理器，支持 GitHub 插件和 inline 插件
+  "thefuck" # thefuck 是一个命令行工具，用于自动纠正上一条命令的错误
   "zoxide" # Zoxide 是一个快速的目录切换工具，类似于 autojump 和 z.lua
   "lsd" # lsd 是一个现代化的 ls 命令替代品，提供更丰富的输出和更好的用户体验
   "bat" # bat 是一个现代化的 cat 命令替代品，提供语法高亮和分页功能
