@@ -10,6 +10,7 @@ function global:Update-Env {
     $machinePath = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
     $userPath    = [System.Environment]::GetEnvironmentVariable('Path', 'User')
     $env:Path    = ($machinePath, $userPath | Where-Object { $_ }) -join ';'
+    if (Get-Command Import-WingetPath -ErrorAction SilentlyContinue) { Import-WingetPath }
 
     foreach ($target in 'Machine', 'User') {
         [System.Environment]::GetEnvironmentVariables($target).GetEnumerator() |

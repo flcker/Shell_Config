@@ -8,13 +8,15 @@
 
 # 需要加载的ps list
 $psFiles = @(
-    "prompt",
-    "starship",
+    "prompt",       # 这个文件负责 PowerShell 提示符的环境变量和别名配置
+    "starship",     # 这个文件负责 starship 提示符的环境变量和别名配置
     "modules",
     "aliases_and_functions",
-    "nvim",
+    "nvim",         # 这个文件负责 Neovim 的环境变量和别名配置
     "coreutils",
-    "config"
+    "config",
+    "zed",          # 这个文件负责 zed 编辑器的环境变量和别名配置
+    "winget_path"   # 这个文件负责 管理 WINGET_PATH 环境变量的注入和同步
 )
 
 # 循环加载每个 ps 文件
