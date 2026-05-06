@@ -12,6 +12,8 @@
    - coreutils.ps1：检测 uutils coreutils 可执行文件，提供命令查询函数，并覆盖冲突的 PowerShell Alias
    - config.ps1：zoxide 等工具初始化配置
    - nvim.ps1：Neovim 别名与配置加载（自动使用 submodule/nvim 下的 init.lua/init.vim）
+   - zed.ps1：Zed 编辑器窗口行为优化（目录新窗口打开，已打开目录复用窗口）
+   - winget_path.ps1：WINGET_PATH 环境变量管理，将 winget 安装路径从 User PATH 分离，支持备份与恢复
 
 2. 主配置入口文件 pwsh_profile.ps1 只负责加载上述子文件。
 
@@ -119,7 +121,9 @@ pwsh/
 │   ├── aliases_and_functions.ps1 # 常用别名与函数
 │   ├── coreutils.ps1             # coreutils 存在时覆盖冲突 Alias
 │   ├── config.ps1                # zoxide 等工具初始化
-│   └── nvim.ps1                  # Neovim 别名与配置加载
+│   ├── nvim.ps1                  # Neovim 别名与配置加载
+│   ├── zed.ps1                   # Zed 编辑器窗口行为优化
+│   └── winget_path.ps1           # WINGET_PATH 环境变量管理
 └── submodule/
     ├── starship/
     │   ├── starship_custom.toml
@@ -130,6 +134,44 @@ pwsh/
     └── git/
         └── config                    # git alias & color，~/.gitconfig 通过 [include] 加载
 ```
+
+---
+
+## WINGET_PATH 管理（winget_path.ps1）
+
+将 winget 安装的 CLI 工具路径从 User PATH 中分离到独立的 `WINGET_PATH` 环境变量，避免 PATH 过长。
+
+### 常用命令
+
+| 命令 | 说明 |
+|------|------|
+| `syncwp` | 扫描 User PATH，迁移 winget 路径到 WINGET_PATH（持久化） |
+| `syncwp -WhatIf` | 预览迁移，不做实际修改 |
+| `backupwp` | 手动创建备份快照 |
+| `restwp -List` | 列出所有备份记录 |
+| `restwp [-Index N]` | 恢复指定备份（省略 -Index 则交互选择） |
+
+### 工作原理
+
+1. `WINGET_PATH` 是用户级环境变量，存储 winget 管理的路径（分号分隔）
+2. 迁移后，User PATH 写入 `%WINGET_PATH%` 引用（REG_EXPAND_SZ），Windows 启动时自动展开
+3. 每次写操作前自动备份，保留最近 10 条记录
+
+### 查看当前状态
+
+```powershell
+$env:WINGET_PATH -split ';'                                          # 当前会话条目
+[Environment]::GetEnvironmentVariable('WINGET_PATH','User')          # 持久化值
+```
+
+---
+
+## Zed 编辑器优化（zed.ps1）
+
+优化 Zed 编辑器在 Windows 上的窗口行为：
+
+- 打开**目录**时：若该目录已在 Zed 中打开，则复用现有窗口；否则以 `--new` 打开新窗口
+- 打开**文件**时：直接在现有窗口中打开
 
 ---
 
