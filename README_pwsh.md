@@ -6,7 +6,7 @@
 
 1. 本仓库支持模块化拆分，所有功能性配置已拆分到 sh 文件夹下的子文件：
    - prompt.ps1：自定义提示符与窗口标题
-   - starship.ps1：starship 主题配置与切换
+   - starship.ps1：starship 主题配置与切换（动态检测 starship/starshipauto 模块）
    - modules.ps1：模块导入与 PSReadLine 设置
    - aliases_and_functions.ps1：常用别名与函数
    - coreutils.ps1：检测 uutils coreutils 可执行文件，提供命令查询函数，并覆盖冲突的 PowerShell Alias
@@ -71,7 +71,9 @@
 
 3. 重新启动 PowerShell 即可自动加载所有配置。
 
-4. 如需自定义 starship 主题，可编辑 submodule/starship 下的 toml 文件。
+4. starship 主题切换使用 `ssc` 命令，支持静态和动态生成配置。如需自定义主题：
+   - 静态：编辑 `submodule/starship/` 下的 toml 文件
+   - 动态：编辑 `submodule/starshipauto/data/` 下的数据文件，然后 `ssc --rebuild`
 
 ---
 
@@ -81,7 +83,8 @@
 
 | Submodule | 路径 | 分支 | 说明 |
 |-----------|------|------|------|
-| starship | `submodule/starship/` | `starship` | starship 主题配置文件（toml） |
+| starship | `submodule/starship/` | `starship` | starship 静态主题配置文件（toml） |
+| starshipauto | `submodule/starshipauto/` | `starshipauto` | starship 动态配置生成器（layout × palette 组合生成） |
 | nvim | `submodule/nvim/` | `nvim` | Neovim 配置，包含 init.lua 或 init.vim |
 | git | `submodule/git/` | `git` | git alias & color 配置，通过 `[include]` 加载到 `~/.gitconfig` |
 
@@ -125,10 +128,15 @@ pwsh/
 │   ├── zed.ps1                   # Zed 编辑器窗口行为优化
 │   └── winget_path.ps1           # WINGET_PATH 环境变量管理
 └── submodule/
-    ├── starship/
+    ├── starship/                     # 静态 starship 主题配置
     │   ├── starship_custom.toml
     │   ├── starship_powerline.toml
-    │   └── starship_plaintextsymbols.toml
+    │   └── ...
+    ├── starshipauto/                 # 动态 starship 配置生成器
+    │   ├── data/                     # 数据层（layouts, palettes, modules, shared）
+    │   ├── engines/                  # 切换引擎（pwsh, sh）
+    │   ├── generate.py              # Python 生成器
+    │   └── generated/               # 生成输出（.gitignore）
     ├── nvim/
     │   └── init.lua                  # Neovim 配置入口（优先加载，也支持 init.vim）
     └── git/
