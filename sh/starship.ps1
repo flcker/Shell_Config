@@ -8,11 +8,15 @@ $starshipConfigs = @(
     "$profileRoot\submodule\starship\starship_plaintextsymbols.toml",
     "$profileRoot\submodule\starship\starship_nerdfontsymbols.toml",
     "$profileRoot\submodule\starship\starship_pastelpowerline.toml",
-    "$profileRoot\submodule\starship\starship_nerdpowerline.toml"
+    "$profileRoot\submodule\starship\starship_nerdpowerline.toml",
+    "$profileRoot\submodule\starship\starship_p10k_rainbow.toml",
+    "$profileRoot\submodule\starship\starship_p10k_classic.toml",
+    "$profileRoot\submodule\starship\starship_p10k_lean.toml"
 )
 $selectedConfig = Get-Random -InputObject $starshipConfigs
 $env:STARSHIP_CONFIG = $selectedConfig
 Invoke-Expression (&starship init powershell)
+Enable-TransientPrompt
 
 function global:Get-CurrentStarshipConfigName {
     switch ($env:STARSHIP_CONFIG) {
@@ -23,6 +27,9 @@ function global:Get-CurrentStarshipConfigName {
         "$profileRoot\submodule\starship\starship_nerdfontsymbols.toml" { return "nerdfontsymbols" }
         "$profileRoot\submodule\starship\starship_pastelpowerline.toml" { return "pastelpowerline" }
         "$profileRoot\submodule\starship\starship_nerdpowerline.toml" { return "nerdpowerline" }
+        "$profileRoot\submodule\starship\starship_p10k_rainbow.toml" { return "p10krainbow" }
+        "$profileRoot\submodule\starship\starship_p10k_classic.toml" { return "p10kclassic" }
+        "$profileRoot\submodule\starship\starship_p10k_lean.toml" { return "p10klean" }
         default { return [System.IO.Path]::GetFileNameWithoutExtension($env:STARSHIP_CONFIG) }
     }
 }
@@ -48,6 +55,9 @@ Config options:
     nerdfontsymbols (nfs)  - Use starship_nerdfontsymbols.toml
     pastelpowerline (ppl)  - Use starship_pastelpowerline.toml
     nerdpowerline (npl)    - Use starship_nerdpowerline.toml
+    p10krainbow (p10kr)    - Use starship_p10k_rainbow.toml
+    p10kclassic (p10kc)    - Use starship_p10k_classic.toml
+    p10klean (p10kl)       - Use starship_p10k_lean.toml
     default (d)            - Use Starship's default config
 
 Example:
@@ -59,7 +69,7 @@ Example:
 
 function global:Switch-StarshipConfig {
     param(
-        [ValidateSet("custom", "powerline", "plaintextsymbols", "nerdfontsymbols", "pastelpowerline", "nerdpowerline", "default", "c", "pl", "pts", "nfs", "ppl", "npl", "d")]
+        [ValidateSet("custom", "powerline", "plaintextsymbols", "nerdfontsymbols", "pastelpowerline", "nerdpowerline", "p10krainbow", "p10kclassic", "p10klean", "default", "c", "pl", "pts", "nfs", "ppl", "npl", "p10kr", "p10kc", "p10kl", "d")]
         [string]$Config = "default",
         [Alias("h")]
         [switch]$Help
@@ -83,6 +93,12 @@ function global:Switch-StarshipConfig {
         "ppl" = "$profileRoot\submodule\starship\starship_pastelpowerline.toml"
         "nerdpowerline" = "$profileRoot\submodule\starship\starship_nerdpowerline.toml"
         "npl" = "$profileRoot\submodule\starship\starship_nerdpowerline.toml"
+        "p10krainbow" = "$profileRoot\submodule\starship\starship_p10k_rainbow.toml"
+        "p10kr" = "$profileRoot\submodule\starship\starship_p10k_rainbow.toml"
+        "p10kclassic" = "$profileRoot\submodule\starship\starship_p10k_classic.toml"
+        "p10kc" = "$profileRoot\submodule\starship\starship_p10k_classic.toml"
+        "p10klean" = "$profileRoot\submodule\starship\starship_p10k_lean.toml"
+        "p10kl" = "$profileRoot\submodule\starship\starship_p10k_lean.toml"
         "default" = ""
         "d" = ""
     }
