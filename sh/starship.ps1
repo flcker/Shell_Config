@@ -54,8 +54,26 @@ if (Test-Path $_autoModule) {
     }
 }
 
-# ── Random selection ──────────────────────────────────────────────────────────
-$env:STARSHIP_CONFIG = Get-Random -InputObject $script:starshipPool
+# ── Lock file ────────────────────────────────────────────────────────────────
+$script:starshipLockFile = "$profileRoot\.starship_lock"
+
+function script:Get-StarshipLockedConfig {
+    if (Test-Path $script:starshipLockFile) {
+        $key = (Get-Content $script:starshipLockFile -Raw).Trim()
+        if ($key -and $script:starshipRegistry.ContainsKey($key)) {
+            return $key
+        }
+    }
+    return $null
+}
+
+# ── Config selection (locked or random) ──────────────────────────────────────
+$lockedKey = Get-StarshipLockedConfig
+if ($lockedKey) {
+    $env:STARSHIP_CONFIG = $script:starshipRegistry[$lockedKey]
+} else {
+    $env:STARSHIP_CONFIG = Get-Random -InputObject $script:starshipPool
+}
 
 # ── Functions ─────────────────────────────────────────────────────────────────
 function global:Get-CurrentStarshipConfigName {
@@ -70,10 +88,16 @@ function global:Get-CurrentStarshipConfigName {
 
 function global:Show-StarshipUsage {
     $currentConfig = Get-CurrentStarshipConfigName
+    $lockedConfig = Get-StarshipLockedConfig
     Write-Host "Switch-StarshipConfig (alias: ssc)" -ForegroundColor Cyan
     Write-Host "Current: $currentConfig" -ForegroundColor Cyan
+    if ($lockedConfig) {
+        Write-Host "Locked:  $lockedConfig" -ForegroundColor Magenta
+    } else {
+        Write-Host "Mode:    random" -ForegroundColor DarkGray
+    }
     Write-Host ""
-    Write-Host "Usage: ssc [-h] [-l] [-r] [-t <a|s> [index]] [Config]" -ForegroundColor Cyan
+    Write-Host "Usage: ssc [-h] [-l] [-r] [-t <a|s> [index]] [--lock [cfg]] [--unlock] [Config]" -ForegroundColor Cyan
     Write-Host ""
 
     # Helper: group keys by path, show canonical (longest) + aliases
@@ -137,6 +161,8 @@ function global:Show-StarshipUsage {
     Write-Host "Commands:" -ForegroundColor Yellow
     Write-Host "    --list,  -l            - List all config keys" -ForegroundColor Cyan
     Write-Host "    --type,  -t <a|s> [N]  - Filter by type: auto(a)/static(s), optional index" -ForegroundColor Cyan
+    Write-Host "    --lock [Config]        - Lock current or specified config for all sessions" -ForegroundColor Cyan
+    Write-Host "    --unlock               - Remove lock, restore random mode" -ForegroundColor Cyan
     if (Get-Module starshipauto) {
         Write-Host "    --rebuild, -r          - Regenerate starshipauto configs" -ForegroundColor Cyan
     }
@@ -145,7 +171,9 @@ function global:Show-StarshipUsage {
     Write-Host "    ssc ang_s              - Prefix match (pl_angled_sharp_*)" -ForegroundColor Cyan
     Write-Host "    ssc -t a               - List starshipauto configs with indices" -ForegroundColor Cyan
     Write-Host "    ssc -t a 3             - Switch to 3rd starshipauto config" -ForegroundColor Cyan
-    Write-Host "    ssc -t a ang           - Prefix match within auto configs" -ForegroundColor Cyan
+    Write-Host "    ssc --lock             - Lock current config" -ForegroundColor Cyan
+    Write-Host "    ssc --lock pl_round    - Lock specified config (prefix match)" -ForegroundColor Cyan
+    Write-Host "    ssc --unlock           - Unlock, next session uses random" -ForegroundColor Cyan
 }
 
 function global:Switch-StarshipConfig {
@@ -159,7 +187,9 @@ function global:Switch-StarshipConfig {
         [Alias("r")]
         [switch]$Rebuild,
         [Alias("t")]
-        [string]$Type = ""
+        [string]$Type = "",
+        [switch]$Lock,
+        [switch]$Unlock
     )
 
     # Handle -- style arguments passed as positional $Config
@@ -167,6 +197,40 @@ function global:Switch-StarshipConfig {
     if ($Config -in '--list', '-l') { $List = $true; $Config = "" }
     if ($Config -in '--rebuild', '-r') { $Rebuild = $true; $Config = "" }
     if ($Config -in '--type', '-t') { $Type = "auto"; $Config = "" }
+    if ($Config -eq '--lock') { $Lock = $true; $Config = "" }
+    if ($Config -eq '--unlock') { $Unlock = $true; $Config = "" }
+
+    # Unlock: remove lock file
+    if ($Unlock) {
+        if (Test-Path $script:starshipLockFile) {
+            Remove-Item $script:starshipLockFile -Force
+            Write-Host "Unlocked. Next session will use random config." -ForegroundColor Green
+        } else {
+            Write-Host "No lock active." -ForegroundColor Yellow
+        }
+        return
+    }
+
+    # Lock: lock current or specified config
+    if ($Lock) {
+        $lockTarget = if ($Config) { $Config } else { Get-CurrentStarshipConfigName }
+        # Resolve prefix if needed
+        if (-not $script:starshipRegistry.ContainsKey($lockTarget)) {
+            $matched = @($script:starshipRegistry.Keys | Where-Object { $_ -like "$lockTarget*" })
+            if ($matched.Count -eq 1) { $lockTarget = $matched[0] }
+            elseif ($matched.Count -gt 1) {
+                Write-Host "Multiple matches for '$lockTarget':" -ForegroundColor Yellow
+                $matched | Sort-Object | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan }
+                return
+            } else {
+                Write-Warning "No match for '$lockTarget'."
+                return
+            }
+        }
+        Set-Content -Path $script:starshipLockFile -Value $lockTarget -NoNewline
+        Write-Host "Locked: $lockTarget" -ForegroundColor Green
+        return
+    }
 
     if ($Help -or (-not $Config -and -not $List -and -not $Rebuild -and -not $Type)) {
         Show-StarshipUsage

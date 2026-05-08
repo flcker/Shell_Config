@@ -71,7 +71,22 @@
 
 3. 重新启动 PowerShell 即可自动加载所有配置。
 
-4. starship 主题切换使用 `ssc` 命令，支持静态和动态生成配置。如需自定义主题：
+4. starship 主题切换使用 `ssc` 命令，支持前缀匹配、类型筛选、序号选择、锁定配置：
+
+   ```powershell
+   ssc pl_round           # 前缀匹配切换
+   ssc -t a               # 列出 starshipauto 配置（带序号）
+   ssc -t a 3             # 按序号切换
+   ssc -t s               # 列出 starship 静态配置（带序号，别名共享序号）
+   ssc --lock             # 锁定当前配置
+   ssc --lock pl_round    # 锁定指定配置
+   ssc --unlock           # 解锁，恢复随机
+   ssc --rebuild          # 重新生成 starshipauto 配置
+   ```
+
+   启动行为：有锁定则使用锁定配置，否则随机选择。
+
+   自定义主题：
    - 静态：编辑 `submodule/starship/` 下的 toml 文件
    - 动态：编辑 `submodule/starshipauto/data/` 下的数据文件，然后 `ssc --rebuild`
 
