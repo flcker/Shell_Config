@@ -22,6 +22,12 @@ if (Test-Path $staticDir) {
         "ppl"              = "starship_pastelpowerline.toml"
         "nerdpowerline"    = "starship_nerdpowerline.toml"
         "npl"              = "starship_nerdpowerline.toml"
+        "p10k_rainbow"     = "starship_p10k_rainbow.toml"
+        "p10kr"            = "starship_p10k_rainbow.toml"
+        "p10k_classic"     = "starship_p10k_classic.toml"
+        "p10kc"            = "starship_p10k_classic.toml"
+        "p10k_lean"        = "starship_p10k_lean.toml"
+        "p10kl"            = "starship_p10k_lean.toml"
     }
     foreach ($entry in $staticMappings.GetEnumerator()) {
         $fullPath = Join-Path $staticDir $entry.Value
@@ -46,19 +52,6 @@ if (Test-Path $_autoModule) {
         $script:starshipRegistry[$entry.Key] = $entry.Value
         $script:starshipPool += $entry.Value
     }
-    # Legacy aliases
-    if ($autoConfigs.ContainsKey("p10k-powerline-rainbow")) {
-        $script:starshipRegistry["p10kr"] = $autoConfigs["p10k-powerline-rainbow"]
-        $script:starshipRegistry["p10krainbow"] = $autoConfigs["p10k-powerline-rainbow"]
-    }
-    if ($autoConfigs.ContainsKey("p10k-powerline-classic")) {
-        $script:starshipRegistry["p10kc"] = $autoConfigs["p10k-powerline-classic"]
-        $script:starshipRegistry["p10kclassic"] = $autoConfigs["p10k-powerline-classic"]
-    }
-    if ($autoConfigs.ContainsKey("p10k-lean-lean")) {
-        $script:starshipRegistry["p10kl"] = $autoConfigs["p10k-lean-lean"]
-        $script:starshipRegistry["p10klean"] = $autoConfigs["p10k-lean-lean"]
-    }
 }
 
 # ── Random selection ──────────────────────────────────────────────────────────
@@ -80,12 +73,11 @@ function global:Show-StarshipUsage {
     Write-Host "Switch-StarshipConfig (alias: ssc)" -ForegroundColor Cyan
     Write-Host "Current: $currentConfig" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "Usage: ssc [-h | --help] [-l | --list] [-r | --rebuild] [Config]" -ForegroundColor Cyan
+    Write-Host "Usage: ssc [-h] [-l] [-r] [-t <a|s> [index]] [Config]" -ForegroundColor Cyan
     Write-Host ""
 
     # Helper: group keys by path, show canonical (longest) + aliases
-    $formatGroup = {
-        param($registry)
+    function Format-ConfigGroup($registry) {
         $pathToKeys = @{}
         foreach ($entry in $registry.GetEnumerator()) {
             $path = $entry.Value
@@ -93,7 +85,7 @@ function global:Show-StarshipUsage {
             $pathToKeys[$path] += $entry.Key
         }
         $pathToKeys.GetEnumerator() | Sort-Object { ($_.Value | Sort-Object { $_.Length } | Select-Object -Last 1) } | ForEach-Object {
-            $keys = $_.Value | Sort-Object { $_.Length }
+            $keys = @($_.Value | Sort-Object { $_.Length })
             $canonical = $keys[-1]
             $aliases = ($keys | Where-Object { $_ -ne $canonical }) -join ', '
             $marker = if ($_.Key -eq $env:STARSHIP_CONFIG) { " *" } else { "" }
@@ -104,47 +96,56 @@ function global:Show-StarshipUsage {
 
     # starshipauto generated configs
     if (Get-Module starshipauto) {
-        $autoRegistry = @{}
         $autoConfigs = Get-StarshipAutoConfigs
-        foreach ($entry in $autoConfigs.GetEnumerator()) {
-            $autoRegistry[$entry.Key] = $entry.Value
-        }
-        # Include legacy aliases that point to generated paths
-        foreach ($entry in $script:starshipRegistry.GetEnumerator()) {
-            if ($entry.Value -and $autoConfigs.Values -contains $entry.Value -and -not $autoRegistry.ContainsKey($entry.Key)) {
-                $autoRegistry[$entry.Key] = $entry.Value
+        $autoKeys = @($autoConfigs.Keys | Sort-Object)
+        if ($autoKeys.Count -gt 0) {
+            Write-Host "starshipauto (ssc -t a <index>):" -ForegroundColor Yellow
+            for ($i = 0; $i -lt $autoKeys.Count; $i++) {
+                $key = $autoKeys[$i]
+                $marker = if ($autoConfigs[$key] -eq $env:STARSHIP_CONFIG) { " *" } else { "" }
+                Write-Host ("    {0,2}  {1}{2}" -f ($i + 1), $key, $marker) -ForegroundColor Cyan
             }
-        }
-        if ($autoRegistry.Count -gt 0) {
-            Write-Host "starshipauto:" -ForegroundColor Yellow
-            & $formatGroup $autoRegistry
             Write-Host ""
         }
     }
 
-    # starship static configs
-    $staticRegistry = @{}
-    foreach ($entry in $script:starshipRegistry.GetEnumerator()) {
-        $isAuto = $false
-        if (Get-Module starshipauto) {
-            $autoConfigs = Get-StarshipAutoConfigs
-            if ($autoConfigs.Values -contains $entry.Value) { $isAuto = $true }
-        }
-        if (-not $isAuto) {
-            $staticRegistry[$entry.Key] = $entry.Value
-        }
+    # starship static configs (grouped by path)
+    $autoValues = @()
+    if (Get-Module starshipauto) {
+        $autoValues = @((Get-StarshipAutoConfigs).Values)
     }
-    if ($staticRegistry.Count -gt 0) {
-        Write-Host "starship:" -ForegroundColor Yellow
-        & $formatGroup $staticRegistry
+    $staticPathToKeys = [ordered]@{}
+    foreach ($key in ($script:starshipRegistry.Keys | Sort-Object)) {
+        $path = $script:starshipRegistry[$key]
+        if ($path -and $autoValues -contains $path) { continue }
+        if (-not $staticPathToKeys.Contains($path)) { $staticPathToKeys[$path] = @() }
+        $staticPathToKeys[$path] += $key
+    }
+    if ($staticPathToKeys.Count -gt 0) {
+        Write-Host "starship (ssc -t s <index>):" -ForegroundColor Yellow
+        $idx = 0
+        foreach ($path in $staticPathToKeys.Keys) {
+            $idx++
+            $keys = @($staticPathToKeys[$path] | Sort-Object { $_.Length })
+            $label = $keys -join '|'
+            $marker = if ($path -eq $env:STARSHIP_CONFIG) { " *" } else { "" }
+            Write-Host ("    {0,2}  {1}{2}" -f $idx, $label, $marker) -ForegroundColor Cyan
+        }
         Write-Host ""
     }
 
     Write-Host "Commands:" -ForegroundColor Yellow
     Write-Host "    --list,  -l            - List all config keys" -ForegroundColor Cyan
+    Write-Host "    --type,  -t <a|s> [N]  - Filter by type: auto(a)/static(s), optional index" -ForegroundColor Cyan
     if (Get-Module starshipauto) {
         Write-Host "    --rebuild, -r          - Regenerate starshipauto configs" -ForegroundColor Cyan
     }
+    Write-Host ""
+    Write-Host "Examples:" -ForegroundColor Yellow
+    Write-Host "    ssc ang_s              - Prefix match (pl_angled_sharp_*)" -ForegroundColor Cyan
+    Write-Host "    ssc -t a               - List starshipauto configs with indices" -ForegroundColor Cyan
+    Write-Host "    ssc -t a 3             - Switch to 3rd starshipauto config" -ForegroundColor Cyan
+    Write-Host "    ssc -t a ang           - Prefix match within auto configs" -ForegroundColor Cyan
 }
 
 function global:Switch-StarshipConfig {
@@ -153,16 +154,21 @@ function global:Switch-StarshipConfig {
         [string]$Config = "",
         [Alias("h")]
         [switch]$Help,
+        [Alias("l")]
         [switch]$List,
-        [switch]$Rebuild
+        [Alias("r")]
+        [switch]$Rebuild,
+        [Alias("t")]
+        [string]$Type = ""
     )
 
     # Handle -- style arguments passed as positional $Config
     if ($Config -in '--help', '-h') { $Help = $true; $Config = "" }
     if ($Config -in '--list', '-l') { $List = $true; $Config = "" }
     if ($Config -in '--rebuild', '-r') { $Rebuild = $true; $Config = "" }
+    if ($Config -in '--type', '-t') { $Type = "auto"; $Config = "" }
 
-    if ($Help -or (-not $Config -and -not $List -and -not $Rebuild)) {
+    if ($Help -or (-not $Config -and -not $List -and -not $Rebuild -and -not $Type)) {
         Show-StarshipUsage
         return
     }
@@ -183,6 +189,73 @@ function global:Switch-StarshipConfig {
         return
     }
 
+    # Resolve type filter
+    $filteredGroups = @()  # each group: @{ Keys=@(...); Path="..." }
+    $filteredKeys = @()
+    if ($Type) {
+        $typeMap = @{ "a" = "auto"; "auto" = "auto"; "s" = "static"; "static" = "static" }
+        $resolvedType = $typeMap[$Type]
+        if (-not $resolvedType) {
+            Write-Warning "Unknown type: '$Type'. Use 'auto'(a) or 'static'(s)."
+            return
+        }
+        $autoConfigs = if (Get-Module starshipauto) { Get-StarshipAutoConfigs } else { @{} }
+        if ($resolvedType -eq "auto") {
+            $filteredKeys = @($autoConfigs.Keys | Sort-Object)
+            $filteredGroups = @($filteredKeys | ForEach-Object { @{ Keys = @($_); Path = $autoConfigs[$_] } })
+        } else {
+            $pathToKeys = [ordered]@{}
+            foreach ($key in ($script:starshipRegistry.Keys | Sort-Object)) {
+                $path = $script:starshipRegistry[$key]
+                if ($autoConfigs.ContainsKey($key)) { continue }
+                if (-not $pathToKeys.Contains($path)) { $pathToKeys[$path] = @() }
+                $pathToKeys[$path] += $key
+            }
+            foreach ($path in $pathToKeys.Keys) {
+                $keys = @($pathToKeys[$path] | Sort-Object { $_.Length })
+                $filteredGroups += @{ Keys = $keys; Path = $path }
+                $filteredKeys += $keys
+            }
+        }
+    }
+
+    # Type + index mode: ssc -t a 3
+    if ($Type -and $Config -match '^\d+$') {
+        $idx = [int]$Config
+        if ($idx -lt 1 -or $idx -gt $filteredGroups.Count) {
+            Write-Warning "Index out of range (1-$($filteredGroups.Count))."
+            return
+        }
+        $Config = $filteredGroups[$idx - 1].Keys[-1]
+    }
+    # Type + no config: list with indices
+    elseif ($Type -and -not $Config) {
+        $label = if ($resolvedType -eq 'auto') { "starshipauto" } else { "starship" }
+        Write-Host "${label} configs:" -ForegroundColor Yellow
+        for ($i = 0; $i -lt $filteredGroups.Count; $i++) {
+            $g = $filteredGroups[$i]
+            $keys = @($g.Keys | Sort-Object { $_.Length })
+            $display = $keys -join '|'
+            $marker = if ($g.Path -eq $env:STARSHIP_CONFIG) { " *" } else { "" }
+            Write-Host ("  {0,2}  {1}{2}" -f ($i + 1), $display, $marker) -ForegroundColor Cyan
+        }
+        return
+    }
+    # Type + prefix: match within filtered set
+    elseif ($Type -and $Config) {
+        $matched = @($filteredKeys | Where-Object { $_ -like "$Config*" })
+        if ($matched.Count -eq 1) {
+            $Config = $matched[0]
+        } elseif ($matched.Count -gt 1) {
+            Write-Host "Multiple matches for '$Config':" -ForegroundColor Yellow
+            $matched | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan }
+            return
+        } else {
+            Write-Warning "No match for '$Config' in $($resolvedType) configs."
+            return
+        }
+    }
+
     if ($List) {
         Write-Host "Available configs:" -ForegroundColor Yellow
         $script:starshipRegistry.Keys | Sort-Object | ForEach-Object {
@@ -192,9 +265,19 @@ function global:Switch-StarshipConfig {
         return
     }
 
-    if (-not $script:starshipRegistry.ContainsKey($Config)) {
-        Write-Warning "Unknown config: '$Config'. Use 'ssc --list' to see available options."
-        return
+    # Prefix matching (no --type)
+    if (-not $Type -and -not $script:starshipRegistry.ContainsKey($Config)) {
+        $matched = @($script:starshipRegistry.Keys | Where-Object { $_ -like "$Config*" })
+        if ($matched.Count -eq 1) {
+            $Config = $matched[0]
+        } elseif ($matched.Count -gt 1) {
+            Write-Host "Multiple matches for '$Config':" -ForegroundColor Yellow
+            $matched | Sort-Object | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan }
+            return
+        } else {
+            Write-Warning "No match for '$Config'. Use 'ssc -l' to see available options."
+            return
+        }
     }
 
     $env:STARSHIP_CONFIG = $script:starshipRegistry[$Config]
@@ -203,6 +286,14 @@ function global:Switch-StarshipConfig {
 }
 
 Set-Alias -Name ssc -Value Switch-StarshipConfig -Scope Global
+
+# ── Tab completion ───────────────────────────────────────────────────────────
+Register-ArgumentCompleter -CommandName Switch-StarshipConfig -ParameterName Config -ScriptBlock {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $script:starshipRegistry.Keys | Where-Object { $_ -like "$wordToComplete*" } | Sort-Object | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
+}
 
 # ── Init ──────────────────────────────────────────────────────────────────────
 Invoke-Expression (&starship init powershell)
