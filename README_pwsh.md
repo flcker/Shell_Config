@@ -238,6 +238,21 @@ gcuu cp                # 同上
 - `exec` = 执行与控制
 - `data` = 数据与计算
 
+### 提示符显示乱码（如 `鉂?` 或 `([char]0x1B)[0m`）
+
+**原因**：终端 console 编码未设为 UTF-8，导致 Unicode 字符（如 `❯`）显示为乱码，ANSI escape 序列被字面输出。
+
+**解决方法**：`pwsh_profile.ps1` 已在顶部设置 UTF-8 编码：
+
+```powershell
+[Console]::InputEncoding  = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+```
+
+同时 `starship.ps1` 定义了 `Invoke-Starship-TransientFunction` 让 Starship 引擎渲染 transient prompt，避免使用硬编码 ANSI 序列。
+
+若仍有问题，检查终端字体是否为 Nerd Font（推荐 Hack Nerd Font、JetBrainsMono Nerd Font）。
+
 ### $PROFILE 路径在哪里？
 
 在 PowerShell 中执行以下命令查看：

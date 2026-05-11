@@ -1,6 +1,12 @@
-# 这个文件是 PowerShell 的本仓库配置的入口文件
+﻿# 这个文件是 PowerShell 的本仓库配置的入口文件
 # 需要在 Microsoft.PowerShell_profile.ps1 中加载这个文件，以便在 PowerShell 中使用这些配置
 
+# ── Encoding & VT ────────────────────────────────────────────────────────────
+[Console]::InputEncoding  = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    $null = [System.Environment]::SetEnvironmentVariable('TERM', 'xterm-256color', 'Process')
+}
 
 # 输出当前目录调试信息，确保正确加载了配置文件
 # Write-Host "Loading PowerShell profile"

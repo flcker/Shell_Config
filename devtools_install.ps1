@@ -1,4 +1,4 @@
-# Usage:
+﻿# Usage:
 #   powershell -File .\devtools_install.ps1 [-Tools <name,...>] [-All] [-Help|-h]
 #
 # 参数说明：

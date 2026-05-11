@@ -37,6 +37,7 @@
 | 分支 | 说明 |
 | :---: | :--- |
 | starship | starship 主题配置 |
+| starshipauto | starship 动态配置生成器（layout × separator × palette 组合） |
 | nvim | Neovim 配置 |
 | git | git alias & color 配置，通过 `[include]` 加载到 `~/.gitconfig` |
 

@@ -1,4 +1,4 @@
-################################################################################
+﻿################################################################################
 # starship
 $profileRoot = Split-Path $PSScriptRoot -Parent
 
@@ -361,4 +361,9 @@ Register-ArgumentCompleter -CommandName Switch-StarshipConfig -ParameterName Con
 
 # ── Init ──────────────────────────────────────────────────────────────────────
 Invoke-Expression (&starship init powershell)
+
+function Invoke-Starship-TransientFunction {
+    &starship module character
+}
+
 Enable-TransientPrompt

@@ -1,4 +1,4 @@
-
+﻿
 # Usage:
 #   powershell -File .\init_profile_dependencies.ps1 [-ModuleScope <CurrentUser|AllUsers|c|a>] [-s <CurrentUser|AllUsers|c|a>] [-u <c|a>] [-Help|-h]
 #

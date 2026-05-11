@@ -1,4 +1,4 @@
-# nvim 配置
+﻿# nvim 配置
 # 这个文件是 nvim 的配置文件，位于 PowerShell 的 profile 脚本中。它用于设置 nvim 的环境变量、别名和函数等，以便在 PowerShell 中使用 nvim。  
 # 如果安装了neovim 就设置nvim的配置（submodule/nvim）和 别名
 
