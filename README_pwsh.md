@@ -13,7 +13,7 @@
    - config.ps1：zoxide 等工具初始化配置
    - nvim.ps1：Neovim 别名与配置加载（自动使用 submodule/nvim 下的 init.lua/init.vim）
    - zed.ps1：Zed 编辑器窗口行为优化（目录新窗口打开，已打开目录复用窗口）
-   - winget_path.ps1：WINGET_PATH 环境变量管理，将 winget 安装路径从 User PATH 分离，支持备份与恢复
+   - winget_path.ps1：winget shim 管理，将 winget 安装路径通过 shims 目录集中管理，解决 PATH 2047 字节溢出
 
 2. 主配置入口文件 pwsh_profile.ps1 只负责加载上述子文件。
 
@@ -141,7 +141,7 @@ pwsh/
 │   ├── config.ps1                # zoxide 等工具初始化
 │   ├── nvim.ps1                  # Neovim 别名与配置加载
 │   ├── zed.ps1                   # Zed 编辑器窗口行为优化
-│   └── winget_path.ps1           # WINGET_PATH 环境变量管理
+│   └── winget_path.ps1           # winget shim 管理（shims 目录 + WINGET_SHIM_PATH）
 └── submodule/
     ├── starship/                     # 静态 starship 主题配置
     │   ├── starship_custom.toml
@@ -160,31 +160,33 @@ pwsh/
 
 ---
 
-## WINGET_PATH 管理（winget_path.ps1）
+## Winget Shim 管理（winget_path.ps1）
 
-将 winget 安装的 CLI 工具路径从 User PATH 中分离到独立的 `WINGET_PATH` 环境变量，避免 PATH 过长。
+通过 shims 目录（`%LOCALAPPDATA%\winget_shims`）集中管理 winget 安装的 CLI 工具，解决 User PATH 的 2047 字节溢出问题。
 
 ### 常用命令
 
 | 命令 | 说明 |
 |------|------|
-| `syncwp` | 扫描 User PATH，迁移 winget 路径到 WINGET_PATH（持久化） |
+| `syncwp` | 扫描 User PATH，迁移 winget 路径并构建 shims |
 | `syncwp -WhatIf` | 预览迁移，不做实际修改 |
-| `backupwp` | 手动创建备份快照 |
-| `restwp -List` | 列出所有备份记录 |
-| `restwp [-Index N]` | 恢复指定备份（省略 -Index 则交互选择） |
+| `syncws` | 扫描所有 winget 包，创建/更新 shims |
+| `wgs` | 列出所有 winget 管理的工具 |
+| `wgs <command>` | 查看指定工具的帮助（--help） |
 
 ### 工作原理
 
-1. `WINGET_PATH` 是用户级环境变量，存储 winget 管理的路径（分号分隔）
-2. 迁移后，User PATH 写入 `%WINGET_PATH%` 引用（REG_EXPAND_SZ），Windows 启动时自动展开
-3. 每次写操作前自动备份，保留最近 10 条记录
+1. `WINGET_SHIM_PATH` 用户级环境变量，仅存储 shims 目录路径（约 39 字节）
+2. User PATH 引用 `%WINGET_SHIM_PATH%`（REG_EXPAND_SZ），Windows 启动时自动展开
+3. 纯 exe 工具生成 `.cmd` shim，有 DLL 依赖的工具创建目录 junction
+4. Profile 加载时 `Import-WingetShimPath` 注入实际包路径到会话 PATH（保证 .exe 直接可用）
 
 ### 查看当前状态
 
 ```powershell
-$env:WINGET_PATH -split ';'                                          # 当前会话条目
-[Environment]::GetEnvironmentVariable('WINGET_PATH','User')          # 持久化值
+wgs                                                                   # 列出所有工具
+$env:WINGET_SHIM_PATH                                                 # shims 目录路径
+Get-Content "$env:LOCALAPPDATA\winget_shims\.manifest.json" | ConvertFrom-Json  # 完整清单
 ```
 
 ---
