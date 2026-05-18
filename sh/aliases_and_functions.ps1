@@ -31,14 +31,14 @@ function global:set_proxy_fun {
     $env:HTTPS_PROXY = "http://127.0.0.1:7890"
     # $env:ALL_PROXY = "socks5://127.0.0.1:7890"
 }
-Set-Alias -Name setproxy -Value set_proxy_fun -Scope Global
+Set-Alias -Name proxyon -Value set_proxy_fun -Scope Global
 
 function global:unset_proxy_fun {
     Remove-Item Env:HTTP_PROXY -ErrorAction SilentlyContinue
     Remove-Item Env:HTTPS_PROXY -ErrorAction SilentlyContinue
     Remove-Item Env:ALL_PROXY -ErrorAction SilentlyContinue
 }
-Set-Alias -Name unsetproxy -Value unset_proxy_fun -Scope Global
+Set-Alias -Name proxyoff -Value unset_proxy_fun -Scope Global
 
 
 # Batch alias registration helper for direct command names.

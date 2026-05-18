@@ -7,13 +7,13 @@
 1. 本仓库支持模块化拆分，所有功能性配置已拆分到 sh 文件夹下的子文件：
    - prompt.ps1：自定义提示符与窗口标题
    - starship.ps1：starship 主题配置与切换（动态检测 starship/starshipauto 模块）
+   - winget_path.ps1：winget shim 管理，将 winget 安装路径通过 shims 目录集中管理，解决 PATH 2047 字节溢出（须在 modules 之前加载，PSFzf 等模块依赖 shims 已注入 PATH）
    - modules.ps1：模块导入与 PSReadLine 设置
    - aliases_and_functions.ps1：常用别名与函数
    - coreutils.ps1：检测 uutils coreutils 可执行文件，提供命令查询函数，并覆盖冲突的 PowerShell Alias
    - config.ps1：zoxide 等工具初始化配置
    - nvim.ps1：Neovim 别名与配置加载（自动使用 submodule/nvim 下的 init.lua/init.vim）
    - zed.ps1：Zed 编辑器窗口行为优化（目录新窗口打开，已打开目录复用窗口）
-   - winget_path.ps1：winget shim 管理，将 winget 安装路径通过 shims 目录集中管理，解决 PATH 2047 字节溢出
 
 2. 主配置入口文件 pwsh_profile.ps1 只负责加载上述子文件。
 
@@ -135,13 +135,13 @@ pwsh/
 ├── sh/
 │   ├── prompt.ps1                # 自定义提示符与窗口标题
 │   ├── starship.ps1              # starship 主题配置与切换
+│   ├── winget_path.ps1           # winget shim 管理（须在 modules 之前加载）
 │   ├── modules.ps1               # 模块导入与 PSReadLine 设置
 │   ├── aliases_and_functions.ps1 # 常用别名与函数
 │   ├── coreutils.ps1             # coreutils 存在时覆盖冲突 Alias
 │   ├── config.ps1                # zoxide 等工具初始化
 │   ├── nvim.ps1                  # Neovim 别名与配置加载
-│   ├── zed.ps1                   # Zed 编辑器窗口行为优化
-│   └── winget_path.ps1           # winget shim 管理（shims 目录 + WINGET_SHIM_PATH）
+│   └── zed.ps1                   # Zed 编辑器窗口行为优化
 └── submodule/
     ├── starship/                     # 静态 starship 主题配置
     │   ├── starship_custom.toml
